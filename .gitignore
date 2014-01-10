@@ -1,9 +1,9 @@
 .git
 *.o
-*.out
 *.d
 *.tmp
 *~
 *.sw?
 .metadata
 Debug
+*.out
