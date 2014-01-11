@@ -7,3 +7,4 @@
 .metadata
 Debug
 *.out
+*Makefile
