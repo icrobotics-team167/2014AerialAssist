@@ -28,7 +28,7 @@ public:
 	
 	// autonomous routines
 	void SetPower();
-	void AutoStatus();	
+	void AutoStatus();
 
 	void LineUpWithGoal();
 	
@@ -43,7 +43,7 @@ protected:
 	Joystick *RealJoy2;
 	SimpleJoystick *Joystick1;
 	SimpleJoystick *Joystick2;
-	MechanumWheels *MechanumDrive;	
+	RobotDrive *MechanumDrive;	
 };
 
 #endif

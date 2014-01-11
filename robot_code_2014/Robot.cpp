@@ -5,10 +5,10 @@ START_ROBOT_CLASS(Robot);
 
 // Robot class constructor
 Robot::Robot() :
-	JagFL(22,CANJaguar::kPosition),
-	JagFR(21,CANJaguar::kPosition),
-	JagBL(23,CANJaguar::kPosition),
-	JagBR(24,CANJaguar::kPosition)
+	JagFL(22, CANJaguar::kPosition),
+	JagFR(21, CANJaguar::kPosition),
+	JagBL(23, CANJaguar::kPosition),
+	JagBR(24, CANJaguar::kPosition)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -17,11 +17,7 @@ Robot::Robot() :
 	Joystick2 = new SimpleJoystick(RealJoy2);
 	
 	// set up drive class
-	UINT16 encoder_lines = 250;
-	MechanumDrive = new MechanumWheels(&JagFL, &JagFR, &JagBL, &JagBR, encoder_lines);
-	MechanumDrive->SetMaxVoltage(10.0);
-	MechanumDrive->StopJags();
-	MechanumDrive->Init(true);
+	MechanumDrive = new RobotDrive(&JagFL, &JagFR, &JagBL, &JagBR);
 	
 	return;
 }
@@ -63,8 +59,8 @@ void Robot::DisabledInit()
 	this->GetWatchdog().SetEnabled(false);
 	this->GetWatchdog().Feed();
 	this->GetWatchdog().SetExpiration(500);
-
-	this->MechanumDrive->Disable();
+	
+	this->MechanumDrive->StopMotor();
 	
 	return;
 }
@@ -96,10 +92,7 @@ void Robot::AutonomousInit()
 	this->GetWatchdog().SetEnabled(true);
 	this->GetWatchdog().Feed();
 	this->GetWatchdog().SetExpiration(0.5);
-	
-	this->MechanumDrive->Enable();
-	MechanumDrive->SetMaxVoltage(7.0);
-		
+
 	return;
 }
 
@@ -112,6 +105,15 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
 {
 	this->GetWatchdog().Feed();
+	
+	// TODO: autonomous shooting code
+	
+	// drive forwards half speed
+	MechanumDrive->Drive(-0.5, 0.0); 
+	// for 2 seconds
+	Wait(2.0);
+	// stop robot
+	MechanumDrive->Drive(0.0, 0.0);
 }
 
 /**
@@ -125,8 +127,6 @@ void Robot::TeleopInit()
 	this->GetWatchdog().SetExpiration(1000.0);
 	this->GetWatchdog().SetEnabled(true);
 	this->GetWatchdog().Feed();
-	
-	this->MechanumDrive->Enable();
 	
 	return;
 }
@@ -144,102 +144,20 @@ void Robot::TeleopPeriodic()
 	this->Joystick2->Update();
 	
 	// Get driving joystick position
-	float x = this->RealJoy1->GetAxis(Joystick::kXAxis);
-	float y = this->RealJoy1->GetAxis(Joystick::kYAxis);
-	float z = Vector3::GetRotation(x, y);
+	float direction = this->RealJoy1->GetDirectionDegrees();
+	float rotation = this->RealJoy1->GetTwist();
 	
-	//---------------------------------------------------------------------
 	// Set the throttle
-	//---------------------------------------------------------------------
 	bool turbo = Joystick1->Toggled(BUTTON_8);
-	double throttle_mag = this->RealJoy1->GetAxis(Joystick::kThrottleAxis) * 7.0;
-	
-	if(Joystick1->Pressed(BUTTON_3))
-		throttle_mag = this->RealJoy1->GetAxis(Joystick::kThrottleAxis) * 12.0;
-	
-	float abs_x = std::abs(x), abs_y = std::abs(y);
-	double stick_mag = max(abs_x, abs_y);
-	double outputVolts = throttle_mag * stick_mag;
-	
-	if(outputVolts < 1)
-		outputVolts = 1.0;
-	
-	if(turbo)
-		outputVolts *= 1.5;
-	
-	if(outputVolts > 12.0)
-		outputVolts = 12.0;
-	
-	MechanumDrive->SetMaxVoltage(outputVolts);
-	
-	//---------------------------------------------------------------------
-	// determine direction
-	//---------------------------------------------------------------------
-	MechanumWheels::DriveDir dir = MechanumWheels::Stop;
-	
-	/*
-	 * Rotation code: buttons 4 and 5 can be pressed to toggle rotation.
-	 * Then, if one of those buttons is pressed and the joystick is moved 
-	 * right, the robot will rotate right (clockwise).
-	 * If the joystick is moved left, the robot will rotate left (counterclockwise).
-	 */
-	if(Joystick1->Pressed(BUTTON_4) || Joystick1->Pressed(BUTTON_5))
-	{
-		if(x > .1)
-			dir = MechanumWheels::RotateRight;
-		else if (x < -.1)
-			dir = MechanumWheels::RotateLeft;
-	}
-	else if(Vector3::GetMagnitude(x, y) < 0.25)
-		// stop
-		dir = MechanumWheels::Stop;
-	else if(z < 30 && z >= 0.0)
-		// right
-		dir = MechanumWheels::Right;
-	else if(z < 75 && z >= 30)
-		// back right (diagonal)
-		dir = MechanumWheels::BackRight;
-	else if(z < 105 && z >= 75)
-		// reverse
-		dir = MechanumWheels::Reverse;
-	else if(z < 165 && z >= 105)
-		// back left (diagonal)
-		dir = MechanumWheels::BackLeft;
-	else if(z < 195 && z >= 165)
-		// left
-		dir = MechanumWheels::Left;
-	else if(z < 255 && z >= 195)
-		// forward left (diagonal)
-		dir = MechanumWheels::FwdLeft;
-	else if(z < 285 && z >= 255)
-		// forward
-		dir = MechanumWheels::Forward;
-	else if(z < 330 && z >= 285)
-		// forward right (diagonal)
-		dir = MechanumWheels::FwdRight;
-	else if(z <= 360 && z >= 330)
-		// right
-		dir = MechanumWheels::Right;
-	else
-		dir = MechanumWheels::Stop;
+	double throttleMag = this->RealJoy1->GetThrottle();
+	float stickMag = this->RealJoy1->GetMagnitude();
+	float totalMag = throttleMag * stickMag;
+	if (turbo)
+		totalMag *= 1.5;
 
+	// drive
 	if(!Joystick1->Toggled(BUTTON_7))
-		MechanumDrive->Update(dir);
-	
-	MechanumDrive->CheckComplete();
-	MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
-		
-	if(task == MechanumWheels::ManualDrive ||
-		task == MechanumWheels::TaskFinished || 
-		task == MechanumWheels::Stop)
-	{
-		MechanumDrive->Update(dir);
-	}
-	else
-	{
-		// currently in a task
-		MechanumDrive->FeedJags();
-	}
+		MechanumDrive->MecanumDrive_Polar(totalMag, direction, rotation);
 	
 	return;
 }
