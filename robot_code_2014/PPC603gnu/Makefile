@@ -162,7 +162,7 @@ IterativeTemplate_partialImage/$(MODE_DIR)/% : LIBPATH =
 IterativeTemplate_partialImage/$(MODE_DIR)/% : LIBS = 
 IterativeTemplate_partialImage/$(MODE_DIR)/% : OBJ_DIR := IterativeTemplate_partialImage/$(MODE_DIR)
 
-IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/MyRobot.o : $(PRJ_ROOT_DIR)/MyRobot.cpp $(FORCE_FILE_BUILD)
+IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Robot.o : $(PRJ_ROOT_DIR)/Robot.cpp $(FORCE_FILE_BUILD)
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
@@ -186,7 +186,7 @@ IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/Ve
 	$(TRACE_FLAG)if [ ! -d "`dirname "$@"`" ]; then mkdir -p "`dirname "$@"`"; fi;echo "building $@"; $(TOOL_PATH)ccppc $(DEBUGFLAGS_C++-Compiler) $(CC_ARCH_SPEC) -ansi -Wall  -MD -MP -mlongcall $(ADDED_C++FLAGS) $(IDE_INCLUDES) $(ADDED_INCLUDES) -DCPU=$(CPU) -DTOOL_FAMILY=$(TOOL_FAMILY) -DTOOL=$(TOOL) -D_WRS_KERNEL   $(DEFINES) -o "$@" -c "$<"
 
 
-OBJECTS_IterativeTemplate_partialImage = IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/MyRobot.o \
+OBJECTS_IterativeTemplate_partialImage = IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Robot.o \
 	 IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/KinectJoy.o \
 	 IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/MechanumWheels.o \
 	 IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/SimpleJoystick.o \
@@ -205,7 +205,7 @@ IterativeTemplate_partialImage/$(MODE_DIR)/IterativeTemplate_partialImage_clean 
 
 force : 
 
-DEP_FILES := IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/MyRobot.d IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/KinectJoy.d IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/MechanumWheels.d \
+DEP_FILES := IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Robot.d IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/KinectJoy.d IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/MechanumWheels.d \
 	 IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/SimpleJoystick.d IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/Team167CanJaguar.d IterativeTemplate_partialImage/$(MODE_DIR)/Objects/robot_code_2014/Team167Lib/Vector3.d
 -include $(DEP_FILES)
 
