@@ -191,24 +191,34 @@ void Robot::TeleopPeriodic()
 			dir = MechanumWheels::RotateLeft;
 	}
 	else if(Vector3::GetMagnitude(x, y) < 0.25)
+		// stop
 		dir = MechanumWheels::Stop;
 	else if(z < 30 && z >= 0.0)
+		// right
 		dir = MechanumWheels::Right;
 	else if(z < 75 && z >= 30)
+		// back right (diagonal)
 		dir = MechanumWheels::BackRight;
 	else if(z < 105 && z >= 75)
+		// reverse
 		dir = MechanumWheels::Reverse;
 	else if(z < 165 && z >= 105)
+		// back left (diagonal)
 		dir = MechanumWheels::BackLeft;
 	else if(z < 195 && z >= 165)
+		// left
 		dir = MechanumWheels::Left;
 	else if(z < 255 && z >= 195)
+		// forward left (diagonal)
 		dir = MechanumWheels::FwdLeft;
 	else if(z < 285 && z >= 255)
+		// forward
 		dir = MechanumWheels::Forward;
 	else if(z < 330 && z >= 285)
+		// forward right (diagonal)
 		dir = MechanumWheels::FwdRight;
 	else if(z <= 360 && z >= 330)
+		// right
 		dir = MechanumWheels::Right;
 	else
 		dir = MechanumWheels::Stop;
