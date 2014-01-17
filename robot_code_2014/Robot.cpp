@@ -74,6 +74,8 @@ void Robot::DisabledInit()
 void Robot::DisabledPeriodic()
 {
 	this->GetWatchdog().Feed();
+	
+	// a change
 		
 	this->Joystick1->Update();
 	this->Joystick2->Update();
