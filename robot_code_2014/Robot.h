@@ -43,7 +43,11 @@ protected:
 	Joystick *RealJoy2;
 	SimpleJoystick *Joystick1;
 	SimpleJoystick *Joystick2;
-	RobotDrive *MechanumDrive;	
+	MechanumWheels *MechanumDrive;
+
+	Servo *Tilt;
+
+	bool camera_locked;	
 };
 
 #endif
