@@ -10,7 +10,8 @@ Robot::Robot() :
 	JagBL(23, CANJaguar::kPosition),
 	JagBR(24, CANJaguar::kPosition),
 	JagCatapult(26, CANJaguar::kPercentVbus),
-	JagRoller(25, CANJaguar::kPercentVbus)
+	JagRoller(25, CANJaguar::kPercentVbus),
+	JagRollerArm(27, CANJaguar::kPercentVbus)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -303,6 +304,38 @@ void Robot::TeleopPeriodic()
 	else
 		JagCatapult.Set(0);
 
+	// --------------
+	// roller control
+	// --------------
+	if (Joystick2->Pressed(BUTTON_4))
+	{
+		// tell the Jaguar to turn forward to pull ball in at 100% voltage forwards
+		JagRoller.Set(1);
+	}
+	else if (Joystick2->Pressed(BUTTON_5))
+	{
+		// tell the Jaguar to turn backwards to push ball out at 100% voltage backwards
+		JagRoller.Set(-1);
+	}
+	else
+		JagRoller.Set(0);
+
+	// ------------------
+	// roller arm control
+	// ------------------
+	if (Joystick2->Pressed(BUTTON_6))
+	{
+		// tell the Jaguar to lift arm at 100% voltage backwards
+		JagRollerArm.Set(-1);
+	}
+	else if (Joystick2->Pressed(BUTTON_7))
+	{
+		// tell the Jaguar to put down arm at 100% voltage forwards
+		JagRollerArm.Set(1);
+	}
+	else
+		JagRollerArm.Set(0);
+	
 	// drive
 	MechanumDrive->CheckComplete();
 	MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;

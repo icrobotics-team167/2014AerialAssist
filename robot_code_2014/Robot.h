@@ -40,6 +40,7 @@ protected:
 	Team167CanJaguar JagBR;
 	Team167CanJaguar JagCatapult;
 	Team167CanJaguar JagRoller;
+	Team167CanJaguar JagRollerArm;
 	
 	Joystick *RealJoy1;
 	Joystick *RealJoy2;
