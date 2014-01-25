@@ -8,10 +8,10 @@ Robot::Robot() :
 	JagFL(22, CANJaguar::kPosition),
 	JagFR(21, CANJaguar::kPosition),
 	JagBL(23, CANJaguar::kPosition),
-	JagBR(24, CANJaguar::kPosition),
-	JagCatapult(26, CANJaguar::kPercentVbus),
-	JagRoller(25, CANJaguar::kPercentVbus),
-	JagRollerArm(27, CANJaguar::kPercentVbus)
+	JagBR(24, CANJaguar::kPosition)
+	//JagCatapult(26, CANJaguar::kPercentVbus),
+	//JagRoller(25, CANJaguar::kPercentVbus),
+	//JagRollerArm(27, CANJaguar::kPercentVbus)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -29,6 +29,8 @@ Robot::Robot() :
 	// initialize camera
 	Tilt = new Servo(1);
 	camera_locked = true;
+	
+	// TODO initialize catapult booleans with switches
 	
 	return;
 }
@@ -83,8 +85,6 @@ void Robot::DisabledInit()
 void Robot::DisabledPeriodic()
 {
 	this->GetWatchdog().Feed();
-	
-	// a change
 		
 	this->Joystick1->Update();
 	this->Joystick2->Update();
@@ -106,6 +106,8 @@ void Robot::AutonomousInit()
 
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
+	
+	MechanumDrive->Move2Loc(MechanumWheels::Forward, 4.0);
 
 	return;
 }
@@ -120,11 +122,6 @@ void Robot::AutonomousPeriodic()
 {
 	this->GetWatchdog().Feed();
 	
-	// TODO: autonomous shooting code
-	
-	MechanumDrive->Move2Loc(MechanumWheels::Forward, 5.0);
-	
-	Wait(10.0);
 	return;
 }
 
@@ -139,6 +136,8 @@ void Robot::TeleopInit()
 	this->GetWatchdog().SetExpiration(1000.0);
 	this->GetWatchdog().SetEnabled(true);
 	this->GetWatchdog().Feed();
+	
+	this->MechanumDrive->Enable();
 	
 	return;
 }
@@ -226,8 +225,6 @@ void Robot::TeleopPeriodic()
 	else if (z >= 247.5 && z < 292.5)
 	{
 		// forward
-		//lastmode = 3;
-		SmartDashboard::PutString("direction", "forward");
 		dir = MechanumWheels::Forward;
 	}
 	else if (z >= 292.5 && z < 337.5)
@@ -235,7 +232,7 @@ void Robot::TeleopPeriodic()
 		// forward right diagonal
 		dir = MechanumWheels::FwdRight;
 	}
-	else if ((z >= 337.5 && z <= 360) || (z >= 0 || z < 22.5))
+	else if ((z >= 337.5 && z <= 360) || (z >= 0 && z < 22.5))
 	{
 		// right
 		dir = MechanumWheels::Right;
@@ -284,6 +281,7 @@ void Robot::TeleopPeriodic()
 	// ----------------
 	// catapult control
 	// ----------------
+	/*
 	if (Joystick2->Pressed(BUTTON_3) && !catapult_cocked)
 	{
 		// tell the Jaguar to run the catapult cocking motor at 100% voltage forwards
@@ -335,6 +333,7 @@ void Robot::TeleopPeriodic()
 	}
 	else
 		JagRollerArm.Set(0);
+	*/
 	
 	// drive
 	MechanumDrive->CheckComplete();
