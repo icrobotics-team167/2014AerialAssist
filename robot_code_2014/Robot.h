@@ -38,6 +38,8 @@ protected:
 	Team167CanJaguar JagFR;
 	Team167CanJaguar JagBL;
 	Team167CanJaguar JagBR;
+	Team167CanJaguar JagCatapult;
+	Team167CanJaguar JagRoller;
 	
 	Joystick *RealJoy1;
 	Joystick *RealJoy2;
@@ -47,7 +49,10 @@ protected:
 
 	Servo *Tilt;
 
-	bool camera_locked;	
+	bool camera_locked;
+
+	bool catapult_cocked;
+	bool catapult_decocked;	
 };
 
 #endif

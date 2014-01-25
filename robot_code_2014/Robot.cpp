@@ -8,7 +8,9 @@ Robot::Robot() :
 	JagFL(22, CANJaguar::kPosition),
 	JagFR(21, CANJaguar::kPosition),
 	JagBL(23, CANJaguar::kPosition),
-	JagBR(24, CANJaguar::kPosition)
+	JagBR(24, CANJaguar::kPosition),
+	JagCatapult(26, CANJaguar::kPercentVbus),
+	JagRoller(25, CANJaguar::kPercentVbus)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -117,12 +119,10 @@ void Robot::AutonomousPeriodic()
 	
 	// TODO: autonomous shooting code
 	
-	// drive forwards half speed
-	//MechanumDrive->Drive(0.5, 0.0); 
-	// for 2 seconds
-	Wait(1.0);
-	// stop robot
-	//MechanumDrive->Drive(0.0, 0.0);
+	MechanumDrive->Move2Loc(MechanumWheels::Forward, 5.0);
+	
+	Wait(10.0);
+	return;
 }
 
 /**
@@ -214,6 +214,7 @@ void Robot::TeleopPeriodic()
 		if (outputVolts < 2.0)
 			outputVolts = 6.0;
 	}
+	// TODO check GetMagnitude
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
 	{
 		// stop
@@ -223,6 +224,7 @@ void Robot::TeleopPeriodic()
 	{
 		// forward
 		//lastmode = 3;
+		SmartDashboard::PutString("direction", "forward");
 		dir = MechanumWheels::Forward;
 	}
 	else if (z >= 292.5 && z < 337.5)
@@ -266,21 +268,43 @@ void Robot::TeleopPeriodic()
 		dir = MechanumWheels::Stop;
 	}
 
+	//SmartDashboard::PutBoolean("button 7 toggled", Joystick1->Toggled(BUTTON_7));
 	if (!Joystick1->Toggled(BUTTON_7))
 		MechanumDrive->Update(dir);
 
-	// --------------
 	// camera control
-	// --------------
-	
 	if (Joystick2->Pressed(BUTTON_10))
 		camera_locked = !camera_locked;
 	if (!camera_locked)
-		ControlCamera();	
+		ControlCamera();
 
+	// ----------------
+	// catapult control
+	// ----------------
+	if (Joystick2->Pressed(BUTTON_3) && !catapult_cocked)
+	{
+		// tell the Jaguar to run the catapult cocking motor at 100% voltage forwards
+		JagCatapult.Set(1);
+	}
+	else if (Joystick2->Pressed(BUTTON_2) && !catapult_decocked)
+	{
+		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
+		JagCatapult.Set(-1);
+	}
+	else if (Joystick2->Pressed(BUTTON_1) && catapult_cocked)
+	{
+		// shoot
+		JagCatapult.Set(1);
+		Wait(0.5);
+		JagCatapult.Set(0);
+	}
+	else
+		JagCatapult.Set(0);
+
+	// drive
 	MechanumDrive->CheckComplete();
 	MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
-		
+	
 	if (task == MechanumWheels::ManualDrive ||
 		task == MechanumWheels::TaskFinished || 
 		task == MechanumWheels::Stop)
