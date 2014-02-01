@@ -22,7 +22,6 @@ public:
 	UINT16 _lastButtonState;	// state of the buttons before the last update
 	UINT16 _currentButtonState;	// current state of the buttons since last update
 	UINT16 _toggledButtons;		// Bit Masked list of buttons that are toggled.
-	
 };
 
 #endif

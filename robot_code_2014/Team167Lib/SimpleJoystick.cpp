@@ -1,6 +1,5 @@
 #include "_Team167Lib.h"
 
-
 //-------------------------------------------------------------------------
 // Simple Joystick Constructor.  
 //    Needs to call ctor of base class (joystick)
@@ -14,8 +13,6 @@ SimpleJoystick::SimpleJoystick(Joystick * my_joy):
 	
 }
 
-
-
 //-------------------------------------------------------------------------
 // Simple Joystick Destructor
 //    clean up any resources that we allocated
@@ -24,7 +21,6 @@ SimpleJoystick::~SimpleJoystick()
 {
 	_joystick = NULL;
 }
-
 
 //-------------------------------------------------------------------------
 // Update Call
@@ -54,11 +50,11 @@ void SimpleJoystick::Update()
 	_currentButtonState = 0;
 	
 	// update the current button state
-	for(UINT16 i=1;i < NumButtons + 1; i++)
+	for(UINT16 i = 1; i <= NumButtons; i++)
 	{
 		UINT16 tmp = 1;
 		
-		// shift the number by i places (each button has their own bit)
+		// shift the number by i places (each button has its own bit)
 		UINT16 btn_num = tmp << i;
 		
 		bool pressed = _joystick->GetRawButton(i);
@@ -68,7 +64,6 @@ void SimpleJoystick::Update()
 		{
 			// add the button to the current list
 			_currentButtonState = _currentButtonState | btn_num;
-			
 
 			UINT16 dif = _lastButtonState ^ _currentButtonState;
 						
@@ -78,12 +73,7 @@ void SimpleJoystick::Update()
 				_toggledButtons = (_toggledButtons ^ btn_num); 
 			}
 		}
-		
-		
 	} // end of for loop
-	
-	
-	
 }
 
 //-------------------------------------------------------------------------
@@ -102,8 +92,6 @@ bool SimpleJoystick::Pressed(UINT32 button)
 	}
 }
 
-
-
 //-------------------------------------------------------------------------
 // Toggled
 //    Returns true is a button was toggled
@@ -120,3 +108,14 @@ bool SimpleJoystick::Toggled(UINT32 button)
 	}
 }
 
+// toggle a button
+void SimpleJoystick::EnableToggle(UINT32 button)
+{
+	_toggledButtons = _toggledButtons | button;
+}
+
+// untoggle a button
+void SimpleJoystick::DisableToggle(UINT32 button)
+{
+	_toggledButtons = _toggledButtons & ~button;
+}
