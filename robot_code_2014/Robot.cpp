@@ -203,9 +203,8 @@ void Robot::TeleopPeriodic()
 	
 	double outputVolts = throttle_mag;
 	
-	if (Joystick1->Toggled(BUTTON_11) && abs_twist > 0.4)
-		// if the joystick is twisted and the drive wants joystick twist rotation,
-		// calculate final voltage with throttle * twist
+	if (abs_twist > 0.4)
+		// if the joystick is twisted, calculate final voltage with throttle * twist
 		outputVolts *= abs_twist;
 	else if (!Joystick1->Pressed(BUTTON_3) && !Joystick1->Pressed(BUTTON_4))
 		// otherwise, if we are not turning get the larger of the x and y values of the joystick posistion,
@@ -227,18 +226,16 @@ void Robot::TeleopPeriodic()
 	// determine direction
 	MechanumWheels::DriveDir dir = MechanumWheels::Stop;
 
-	if (Joystick1->Toggled(BUTTON_11))
+	if (abs_twist > 0.4)
 	{
-		//Joystick1->DisableToggle(BUTTON_12);
-		
-		if (twist > 0.4)
+		if (twist > 0)
 		{
 			// rotate right
 			dir = MechanumWheels::RotateRight;
 			if (outputVolts < 2.0)
 				outputVolts = 2.0;
 		}
-		else if (twist < -0.4)
+		else
 		{
 			// rotate left
 			dir = MechanumWheels::RotateLeft;
@@ -246,23 +243,16 @@ void Robot::TeleopPeriodic()
 				outputVolts = 2.0;
 		}
 	}
-	
-	else if (Joystick1->Toggled(BUTTON_12))
+	else if (Joystick1->Pressed(BUTTON_4))
 	{
-		//Joystick1->DisableToggle(BUTTON_11);
-		
-		if (Joystick1->Pressed(BUTTON_4))
-		{
 			// rotate right
 			dir = MechanumWheels::RotateRight;
-		}
-		else if (Joystick1->Pressed(BUTTON_3))
-		{
-			// rotate left
-			dir = MechanumWheels::RotateLeft;
-		}
 	}
-	
+	else if (Joystick1->Pressed(BUTTON_3))
+	{
+		// rotate left
+		dir = MechanumWheels::RotateLeft;
+	}
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
 	{
 		// stop
