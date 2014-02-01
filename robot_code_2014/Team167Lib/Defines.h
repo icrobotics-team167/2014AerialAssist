@@ -27,6 +27,7 @@
 #define BUTTON_9 0x200
 #define BUTTON_10 0x400
 #define BUTTON_11 0x800
+#define BUTTON_12 0x1000
 
 #define NUMBER_OF_AXIS 6
 

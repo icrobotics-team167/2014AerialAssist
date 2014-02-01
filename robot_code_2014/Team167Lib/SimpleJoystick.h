@@ -16,10 +16,8 @@ public:
 	
 	
 public:
-	static const UINT32 NumButtons = 11;
+	static const UINT32 NumButtons = 12;
 	Joystick * _joystick;
-	
-//protected:
 	
 	UINT16 _lastButtonState;	// state of the buttons before the last update
 	UINT16 _currentButtonState;	// current state of the buttons since last update
