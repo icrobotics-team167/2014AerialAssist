@@ -111,7 +111,11 @@ void Robot::AutonomousInit()
 	int verticalTargets[MAX_PARTICLES];
 	int horizontalTargets[MAX_PARTICLES];
 	int verticalTargetCount, horizontalTargetCount;
-	Threshold threshold(105, 137, 230, 255, 133, 183);	//HSV threshold criteria, ranges are in that order ie. Hue is 60-100
+	
+	//Threshold threshold(105, 137, 230, 255, 133, 183);	//HSV threshold criteria, ranges are in that order ie. Hue is 60-100
+	// todo find correct threshold values
+	Threshold threshold(88, 146, 125, 255, 36, 102);
+	
 	ParticleFilterCriteria2 criteria[] = {
 			{IMAQ_MT_AREA, AREA_MINIMUM, 65535, false, false}
 	};												//Particle filter criteria, used to filter out small particles
@@ -126,6 +130,7 @@ void Robot::AutonomousInit()
 	//image = new RGBImage("/testImage.jpg");		// get the sample image from the cRIO flash
 
 	image = camera.GetImage();				//To get the images from the camera comment the line above and uncomment this one
+	//image->Write("/image.bmp");
 	BinaryImage *thresholdImage = image->ThresholdHSV(threshold);	// get just the green target pixels
 	//thresholdImage->Write("/threshold.bmp");
 	BinaryImage *filteredImage = thresholdImage->ParticleFilter(criteria, 1);	//Remove small particles
@@ -244,6 +249,8 @@ void Robot::AutonomousInit()
 	if (!target.Hot)
 		Wait(5.0);
 	
+	// todo catapult will start decocked
+	// todo rotate to face hot goal
 	// shoot
 	//JagCatapult.Set(1);
 	//Wait(0.5);
@@ -456,6 +463,9 @@ void Robot::TeleopPeriodic()
 	if (!camera_locked)
 		ControlCamera();
 
+	
+	// todo probably move roller arm and roller at half speed
+	
 	// ----------------
 	// catapult control
 	// ----------------
