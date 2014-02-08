@@ -18,7 +18,7 @@ double Robot::computeDistance(BinaryImage *image, ParticleAnalysisReport *report
 	height = min((double) report->boundingRect.height, rectLong);
 	targetHeight = 32;
 	
-	return Y_IMAGE_RES * targetHeight / (height * 12 * 2 * tan(VIEW_ANGLE*PI/(180*2)));
+	return Y_IMAGE_RES * targetHeight / (height * 12 * 2 * tan(VIEW_ANGLE * PI / (180 * 2)));
 }
 
 /**

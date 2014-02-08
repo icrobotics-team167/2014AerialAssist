@@ -5,8 +5,8 @@
 #include "Vision/BinaryImage.h"
 
 //Camera constants used for distance calculation
-#define Y_IMAGE_RES 480		//X Image resolution in pixels, should be 120, 240 or 480
-#define VIEW_ANGLE 49		//Axis M1013
+#define Y_IMAGE_RES 480		// Y Image resolution in pixels, should be 120, 240 or 480
+#define VIEW_ANGLE 35.489		// Axis M1011
 
 //Score limits used for target identification
 #define RECTANGULARITY_LIMIT 40
