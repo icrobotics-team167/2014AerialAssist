@@ -61,12 +61,13 @@ public:
 	{
 		int verticalIndex;
 		int horizontalIndex;
-		bool Hot;
+		bool hot;
 		double totalScore;
 		double leftScore;
 		double rightScore;
 		double tapeWidthScore;
 		double verticalScore;
+		double distance;
 	};
 	
 	double computeDistance(BinaryImage *image, ParticleAnalysisReport *report);
@@ -76,6 +77,7 @@ public:
 	double ratioToScore(double ratio);
 	bool hotOrNot(TargetReport target);
 	void LineUpWithGoal();
+	TargetReport getBestTarget(bool setHot = false, bool setDistance = false);
 	
 protected:
 	//driving jaguars
@@ -99,8 +101,6 @@ protected:
 
 	bool catapult_cocked;
 	bool catapult_decocked;
-	
-	TargetReport target;
 };
 
 #endif
