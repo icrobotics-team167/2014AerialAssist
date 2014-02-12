@@ -94,6 +94,8 @@ protected:
 	SimpleJoystick *Joystick1;
 	SimpleJoystick *Joystick2;
 	MechanumWheels *MechanumDrive;
+	
+	DigitalInput CatapultPhotoEye;
 
 	bool catapult_cocked;
 };

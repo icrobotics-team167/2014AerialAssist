@@ -9,10 +9,11 @@ Robot::Robot() :
 	JagFR(21, CANJaguar::kPosition),
 	JagBL(23, CANJaguar::kPosition),
 	JagBR(24, CANJaguar::kPosition),
-	// todo catapult motor is a Victor
-	VicCatapult(1)
+	VicCatapult(1),
 	//JagRoller(25, CANJaguar::kPercentVbus),
-	//JagRollerArm(27, CANJaguar::kPercentVbus)
+	//JagRollerArm(27, CANJaguar::kPercentVbus),
+	
+	CatapultPhotoEye(2)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -27,7 +28,8 @@ Robot::Robot() :
 	MechanumDrive->StopJags();
 	MechanumDrive->Init(true);
 	
-	// TODO initialize catapult boolean with switch
+	// initialize catapult_cocked boolean to state of catapult photo eye
+	catapult_cocked = CatapultPhotoEye.Get();
 	
 	return;
 }
@@ -248,7 +250,7 @@ void Robot::TeleopPeriodic()
 	
 	if (outputVolts > 12.0)
 		outputVolts = 12.0;
-			
+
 	MechanumDrive->SetMaxVoltage(outputVolts);
 	
 	// determine direction
@@ -342,12 +344,19 @@ void Robot::TeleopPeriodic()
 	// ----------------
 	
 	// CANNOT run catapult backwards (CANNOT decock)
-	// todo PhotoEye sensor to indicate when catapult is cocked
 	
-	if (Joystick2->Pressed(BUTTON_4) && !catapult_cocked)
+	// set cocked status of catapult based on current state of photo eye
+	catapult_cocked = CatapultPhotoEye.Get();
+	
+	if (Joystick2->Toggled(BUTTON_4) && !catapult_cocked)
 	{
 		// tell the Jaguar to run the catapult cocking motor at 100% voltage forwards
 		VicCatapult.Set(1);
+	}
+	else if (Joystick2->Toggled(BUTTON_4) && catapult_cocked)
+	{
+		VicCatapult.Set(0);
+		Joystick2->DisableToggle(BUTTON_4);
 	}
 	else if (Joystick2->Pressed(BUTTON_1) && catapult_cocked)
 	{
