@@ -31,7 +31,7 @@ Robot::Robot() :
 	Tilt = new Servo(1);
 	camera_locked = true;
 	
-	// TODO initialize catapult booleans with switches
+	// TODO initialize catapult boolean with switch
 	
 	return;
 }
@@ -352,15 +352,13 @@ void Robot::TeleopPeriodic()
 	// catapult control
 	// ----------------
 	
+	// CANNOT run catapult backwards (CANNOT decock)
+	// todo PhotoEye sensor to indicate when catapult is cocked
+	
 	if (Joystick2->Pressed(BUTTON_4) && !catapult_cocked)
 	{
 		// tell the Jaguar to run the catapult cocking motor at 100% voltage forwards
 		VicCatapult.Set(1);
-	}
-	else if (Joystick2->Pressed(BUTTON_3) && !catapult_decocked)
-	{
-		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
-		VicCatapult.Set(-1);
 	}
 	else if (Joystick2->Pressed(BUTTON_1) && catapult_cocked)
 	{

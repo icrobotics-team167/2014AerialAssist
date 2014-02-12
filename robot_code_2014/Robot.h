@@ -100,7 +100,6 @@ protected:
 	bool camera_locked;
 
 	bool catapult_cocked;
-	bool catapult_decocked;
 };
 
 #endif
