@@ -122,6 +122,7 @@ Robot::TargetReport Robot::getBestTarget(bool setHot, bool setDistance)
 	
 	// Threshold threshold(105, 137, 230, 255, 133, 183); (FIRST-provided values)
 	// HSV threshold criteria, ranges are in that order ie. Hue is 60-100
+	// todo recalibrate threshold at competition
 	Threshold threshold(88, 146, 125, 255, 50, 102);
 	
 	// Particle filter criteria, used to filter out small particles

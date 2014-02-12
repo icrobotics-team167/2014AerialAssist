@@ -26,10 +26,6 @@ Robot::Robot() :
 	MechanumDrive->SetMaxVoltage(10.0);
 	MechanumDrive->StopJags();
 	MechanumDrive->Init(true);
-
-	// initialize camera
-	Tilt = new Servo(1);
-	camera_locked = true;
 	
 	// TODO initialize catapult boolean with switch
 	
@@ -338,13 +334,6 @@ void Robot::TeleopPeriodic()
 
 	if (!Joystick1->Toggled(BUTTON_7))
 		MechanumDrive->Update(dir);
-
-	// camera control
-	if (Joystick2->Pressed(BUTTON_10))
-		camera_locked = !camera_locked;
-	if (!camera_locked)
-		ControlCamera();
-
 	
 	// todo probably move roller arm and roller at half speed
 	
@@ -421,29 +410,4 @@ void Robot::TeleopPeriodic()
 	}
 
 	return;
-}
-
-//-------------------------------------------------------------------------
-// Control Camera
-//-------------------------------------------------------------------------
-void Robot::ControlCamera()
-{	
-	// Get adjusted axis value from joystick
-	int y_val = (int) (floor(RealJoy2->GetAxis(Joystick::kYAxis) * 4.0));
-	
-	// Check to make sure axis value is sufficiently large
-	if(abs(y_val) < 2)
-		y_val = 0;
-	
-	// Set position value for Tilt servo
-	int tilt_pos = (int) Tilt->GetRaw();
-	tilt_pos += y_val;
-	
-	// Make sure position value doesn't exceed max positions of camera
-	tilt_pos = max(0, tilt_pos);
-	tilt_pos = min(tilt_pos, 255);
-	
-	// Make sure there is a change in position before resetting it
-	if (y_val != 0)
-		Tilt->SetRaw((UINT8) tilt_pos);
 }

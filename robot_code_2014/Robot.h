@@ -5,6 +5,7 @@
 #include "Vision/BinaryImage.h"
 
 //Camera constants used for distance calculation
+// todo recalibrate view angle for Axix M1013
 #define Y_IMAGE_RES 480		// Y Image resolution in pixels, should be 120, 240 or 480
 #define VIEW_ANGLE 35.489		// Axis M1011
 
@@ -44,7 +45,6 @@ public:
 	void TeleopInit();
 	void TeleopPeriodic();
 	
-	void ControlCamera();
 	void SetPIDs();
 	
 	// Vision processing methods and structures
@@ -94,10 +94,6 @@ protected:
 	SimpleJoystick *Joystick1;
 	SimpleJoystick *Joystick2;
 	MechanumWheels *MechanumDrive;
-
-	Servo *Tilt;
-
-	bool camera_locked;
 
 	bool catapult_cocked;
 };
