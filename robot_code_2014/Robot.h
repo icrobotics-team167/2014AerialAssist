@@ -98,6 +98,9 @@ protected:
 	DigitalInput CatapultPhotoEye;
 
 	bool catapult_cocked;
+	
+	int shooter_wait_count;
+	bool shooting;
 };
 
 #endif

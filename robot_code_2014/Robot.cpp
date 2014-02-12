@@ -31,6 +31,9 @@ Robot::Robot() :
 	// initialize catapult_cocked boolean to state of catapult photo eye
 	catapult_cocked = CatapultPhotoEye.Get();
 	
+	shooter_wait_count = 0;
+	shooting = false;
+	
 	return;
 }
 
@@ -181,6 +184,8 @@ void Robot::SetPIDs()
  *
  * Use this method for code which will be called periodically at a regular
  * rate while the robot is in teleop mode.
+ * 
+ * TeleopPeriodic is called about once every 20 ms; it is synchronized with updates from the Driver Station
  */
 void Robot::TeleopPeriodic()
 {
@@ -358,12 +363,22 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(0);
 		Joystick2->DisableToggle(BUTTON_4);
 	}
-	else if (Joystick2->Pressed(BUTTON_1) && catapult_cocked)
+	else if (Joystick2->Toggled(BUTTON_1) && (catapult_cocked || shooting))
 	{
 		// shoot
-		VicCatapult.Set(1);
-		Wait(0.5);
-		VicCatapult.Set(0);
+		if (shooter_wait_count <= 25)
+		{
+			VicCatapult.Set(1);
+			shooter_wait_count++;
+			shooting = true;
+		}
+		else
+		{
+			VicCatapult.Set(0);
+			Joystick2->DisableToggle(BUTTON_1);
+			shooter_wait_count = 0;
+			shooting = false;
+		}
 	}
 	else
 		VicCatapult.Set(0);
