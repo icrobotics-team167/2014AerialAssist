@@ -8,4 +8,4 @@
 Debug
 *.out
 *Makefile
-robot_code_2014/PPC603gnu/IterativeTemplate/Debug/ctdt.c
+*ctdt.c

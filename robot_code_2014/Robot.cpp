@@ -8,8 +8,9 @@ Robot::Robot() :
 	JagFL(22, CANJaguar::kPosition),
 	JagFR(21, CANJaguar::kPosition),
 	JagBL(23, CANJaguar::kPosition),
-	JagBR(24, CANJaguar::kPosition)
-	//JagCatapult(26, CANJaguar::kPercentVbus),
+	JagBR(24, CANJaguar::kPosition),
+	// todo catapult motor is a Victor
+	VicCatapult(1)
 	//JagRoller(25, CANJaguar::kPercentVbus),
 	//JagRollerArm(27, CANJaguar::kPercentVbus)
 {
@@ -118,9 +119,9 @@ void Robot::AutonomousInit()
 	// todo catapult will start decocked
 	// todo rotate to face hot goal?
 	// shoot
-	//JagCatapult.Set(1);
+	//VicCatapult.Set(1);
 	//Wait(0.5);
-	//JagCatapult.Set(0);
+	//VicCatapult.Set(0);
 	//Wait(0.5);
 	
 	// drive forward into our zone
@@ -350,27 +351,28 @@ void Robot::TeleopPeriodic()
 	// ----------------
 	// catapult control
 	// ----------------
-	/*
+	
 	if (Joystick2->Pressed(BUTTON_4) && !catapult_cocked)
 	{
 		// tell the Jaguar to run the catapult cocking motor at 100% voltage forwards
-		JagCatapult.Set(1);
+		VicCatapult.Set(1);
 	}
 	else if (Joystick2->Pressed(BUTTON_3) && !catapult_decocked)
 	{
 		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
-		JagCatapult.Set(-1);
+		VicCatapult.Set(-1);
 	}
 	else if (Joystick2->Pressed(BUTTON_1) && catapult_cocked)
 	{
 		// shoot
-		JagCatapult.Set(1);
+		VicCatapult.Set(1);
 		Wait(0.5);
-		JagCatapult.Set(0);
+		VicCatapult.Set(0);
 	}
 	else
-		JagCatapult.Set(0);
+		VicCatapult.Set(0);
 
+	/*
 	// --------------
 	// roller control
 	// --------------

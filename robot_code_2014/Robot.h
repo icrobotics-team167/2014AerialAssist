@@ -85,7 +85,7 @@ protected:
 	Team167CanJaguar JagFR;
 	Team167CanJaguar JagBL;
 	Team167CanJaguar JagBR;
-	//Team167CanJaguar JagCatapult;
+	Victor VicCatapult;
 	//Team167CanJaguar JagRoller;
 	//Team167CanJaguar JagRollerArm;
 	
