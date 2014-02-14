@@ -115,7 +115,7 @@ void Robot::AutonomousInit()
 	// if the best target found is NOT hot, wait until it is before proceeding
 	// with autonomous mode
 	if (!target.hot)
-		Wait(5.0);
+		Wait(4.0);
 	
 	// catapult will start decocked
 	// shoot
