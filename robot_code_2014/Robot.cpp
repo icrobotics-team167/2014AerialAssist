@@ -205,7 +205,7 @@ void Robot::TeleopPeriodic()
 		// todo "in shooting range" Dashboard variable?
 	}
 	else
-		SmartDashboard::PutNumber("distance", 0.0);
+		SmartDashboard::PutNumber("distance", -1.0);
 
 	//-------------------------
 	// drive logic (input side)
