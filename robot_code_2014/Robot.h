@@ -80,19 +80,22 @@ public:
 	TargetReport getBestTarget(bool setHot = false, bool setDistance = false);
 	
 protected:
-	//driving jaguars
+	// driving jaguars
 	Team167CanJaguar JagFL;
 	Team167CanJaguar JagFR;
 	Team167CanJaguar JagBL;
 	Team167CanJaguar JagBR;
+	
+	// motor controllers for other components
 	Victor VicCatapult;
-	//Team167CanJaguar JagRoller;
-	//Team167CanJaguar JagRollerArm;
+	Team167CanJaguar JagRoller;
+	Team167CanJaguar JagRollerArm;
 	
 	Joystick *RealJoy1;
 	Joystick *RealJoy2;
 	SimpleJoystick *Joystick1;
 	SimpleJoystick *Joystick2;
+	
 	MechanumWheels *MechanumDrive;
 	
 	DigitalInput CatapultPhotoEye;

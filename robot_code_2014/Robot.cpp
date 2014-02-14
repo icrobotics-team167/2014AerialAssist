@@ -10,8 +10,8 @@ Robot::Robot() :
 	JagBL(23, CANJaguar::kPosition),
 	JagBR(24, CANJaguar::kPosition),
 	VicCatapult(1),
-	//JagRoller(25, CANJaguar::kPercentVbus),
-	//JagRollerArm(27, CANJaguar::kPercentVbus),
+	JagRoller(25, CANJaguar::kPercentVbus),
+	JagRollerArm(27, CANJaguar::kPercentVbus),
 	
 	CatapultPhotoEye(2)
 {
@@ -117,13 +117,12 @@ void Robot::AutonomousInit()
 	if (!target.hot)
 		Wait(5.0);
 	
-	// todo catapult will start decocked
-	// todo rotate to face hot goal?
+	// catapult will start decocked
 	// shoot
-	//VicCatapult.Set(-1);
-	//Wait(0.5);
-	//VicCatapult.Set(0);
-	//Wait(0.5);
+	VicCatapult.Set(-1);
+	Wait(0.5);
+	VicCatapult.Set(0);
+	Wait(0.5);
 	
 	// drive forward into our zone
 	MechanumDrive->SetMaxVoltage(4.0);
@@ -384,7 +383,6 @@ void Robot::TeleopPeriodic()
 	else
 		VicCatapult.Set(0);
 
-	/*
 	// --------------
 	// roller control
 	// --------------
@@ -416,7 +414,6 @@ void Robot::TeleopPeriodic()
 	}
 	else
 		JagRollerArm.Set(0);
-	*/
 	
 	// drive
 	MechanumDrive->CheckComplete();
