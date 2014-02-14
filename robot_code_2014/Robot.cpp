@@ -120,7 +120,7 @@ void Robot::AutonomousInit()
 	// todo catapult will start decocked
 	// todo rotate to face hot goal?
 	// shoot
-	//VicCatapult.Set(1);
+	//VicCatapult.Set(-1);
 	//Wait(0.5);
 	//VicCatapult.Set(0);
 	//Wait(0.5);
@@ -349,14 +349,15 @@ void Robot::TeleopPeriodic()
 	// ----------------
 	
 	// CANNOT run catapult backwards (CANNOT decock)
+	// Note: catapult motor should be run backwards to cock the catapult (pull it back)
 	
 	// set cocked status of catapult based on current state of photo eye
 	catapult_cocked = CatapultPhotoEye.Get();
 	
 	if (Joystick2->Toggled(BUTTON_4) && !catapult_cocked)
 	{
-		// tell the Jaguar to run the catapult cocking motor at 100% voltage forwards
-		VicCatapult.Set(1);
+		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
+		VicCatapult.Set(-1);
 	}
 	else if (Joystick2->Toggled(BUTTON_4) && catapult_cocked)
 	{
@@ -368,7 +369,7 @@ void Robot::TeleopPeriodic()
 		// shoot
 		if (shooter_wait_count <= 25)
 		{
-			VicCatapult.Set(1);
+			VicCatapult.Set(-1);
 			shooter_wait_count++;
 			shooting = true;
 		}
