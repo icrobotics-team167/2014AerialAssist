@@ -5,13 +5,13 @@ START_ROBOT_CLASS(Robot);
 
 // Robot class constructor
 Robot::Robot() :
-	JagFL(22, CANJaguar::kPosition),
-	JagFR(21, CANJaguar::kPosition),
+	JagFL(21, CANJaguar::kPosition),
+	JagFR(22, CANJaguar::kPosition),
 	JagBL(23, CANJaguar::kPosition),
 	JagBR(24, CANJaguar::kPosition),
 	VicCatapult(1),
 	JagRoller(25, CANJaguar::kPercentVbus),
-	JagRollerArm(27, CANJaguar::kPercentVbus),
+	JagRollerArm(26, CANJaguar::kPercentVbus),
 	
 	CatapultPhotoEye(2)
 {
@@ -388,13 +388,13 @@ void Robot::TeleopPeriodic()
 	// --------------
 	if (Joystick2->Pressed(BUTTON_10))
 	{
-		// tell the Jaguar to turn forward to pull ball in at 100% voltage forwards
-		JagRoller.Set(1);
+		// tell the Jaguar to turn forward to pull ball in at 50% voltage forwards
+		JagRoller.Set(0.5);
 	}
 	else if (Joystick2->Pressed(BUTTON_9))
 	{
-		// tell the Jaguar to turn backwards to push ball out at 100% voltage backwards
-		JagRoller.Set(-1);
+		// tell the Jaguar to turn backwards to push ball out at 50% voltage backwards
+		JagRoller.Set(-0.5);
 	}
 	else
 		JagRoller.Set(0);
@@ -404,13 +404,13 @@ void Robot::TeleopPeriodic()
 	// ------------------
 	if (Joystick2->Pressed(BUTTON_12))
 	{
-		// tell the Jaguar to lift arm at 100% voltage backwards
-		JagRollerArm.Set(-1);
+		// tell the Jaguar to lift arm at 50% voltage backwards
+		JagRollerArm.Set(-0.5);
 	}
 	else if (Joystick2->Pressed(BUTTON_11))
 	{
-		// tell the Jaguar to put down arm at 100% voltage forwards
-		JagRollerArm.Set(1);
+		// tell the Jaguar to put down arm at 50% voltage forwards
+		JagRollerArm.Set(0.5);
 	}
 	else
 		JagRollerArm.Set(0);
