@@ -120,7 +120,7 @@ void Robot::AutonomousInit()
 	// catapult will start decocked
 	// shoot
 	VicCatapult.Set(-1);
-	Wait(0.5);
+	Wait(2.0);
 	VicCatapult.Set(0);
 	Wait(0.5);
 	
