@@ -13,7 +13,7 @@ Robot::Robot() :
 	JagRoller(25, CANJaguar::kPercentVbus),
 	JagRollerArm(26, CANJaguar::kPercentVbus),
 	
-	CatapultPhotoEye(2)
+	CatapultPhotoEye(1)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -87,7 +87,7 @@ void Robot::DisabledInit()
 void Robot::DisabledPeriodic()
 {
 	this->GetWatchdog().Feed();
-		
+	
 	this->Joystick1->Update();
 	this->Joystick2->Update();
 
@@ -213,7 +213,7 @@ void Robot::TeleopPeriodic()
 	
 	// get joystick position
 	float x = this->RealJoy1->GetAxis(Joystick::kXAxis);
-	float y = this->RealJoy1->GetAxis(Joystick::kYAxis);
+	float y = -this->RealJoy1->GetAxis(Joystick::kYAxis);
 	float z = Vector3::GetRotation(x, y);
 	
 	// raw axis 3 is the twist axis on the Logitech Extreme 3D Pro joystick
@@ -300,17 +300,17 @@ void Robot::TeleopPeriodic()
 	else if (z >= 292.5 && z < 337.5)
 	{
 		// forward right diagonal
-		dir = MechanumWheels::FwdRight;
+		dir = MechanumWheels::FwdLeft;
 	}
 	else if ((z >= 337.5 && z <= 360) || (z >= 0 && z < 22.5))
 	{
 		// right
-		dir = MechanumWheels::Right;
+		dir = MechanumWheels::Left;
 	}
 	else if (z >= 22.5 && z < 67.5)
 	{
 		// backward right diagonal
-		dir = MechanumWheels::BackRight;
+		dir = MechanumWheels::BackLeft;
 	}
 	else if(z >= 67.5 && z < 112.5)
 	{
@@ -320,28 +320,23 @@ void Robot::TeleopPeriodic()
 	else if (z >= 112.5 && z < 157.5)
 	{
 		// backward left diagonal
-		dir = MechanumWheels::BackLeft;
+		dir = MechanumWheels::BackRight;
 	}
 	else if (z >= 157.5 && z < 202.5)
 	{
 		// left
-		dir = MechanumWheels::Left;
+		dir = MechanumWheels::Right;
 	}
 	else if (z >= 202.5 && z < 247.5)
 	{
 		// forward left diagonal
-		dir = MechanumWheels::FwdLeft;
+		dir = MechanumWheels::FwdRight;
 	}
 	else
 	{
 		// stop
 		dir = MechanumWheels::Stop;
 	}
-
-	if (!Joystick1->Toggled(BUTTON_7))
-		MechanumDrive->Update(dir);
-	
-	// todo probably move roller arm and roller at half speed
 	
 	// ----------------
 	// catapult control
@@ -352,6 +347,9 @@ void Robot::TeleopPeriodic()
 	
 	// set cocked status of catapult based on current state of photo eye
 	catapult_cocked = CatapultPhotoEye.Get();
+	
+	// todo remove
+	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
 	
 	if (Joystick2->Toggled(BUTTON_4) && !catapult_cocked)
 	{
@@ -366,7 +364,7 @@ void Robot::TeleopPeriodic()
 	else if (Joystick2->Toggled(BUTTON_1) && (catapult_cocked || shooting))
 	{
 		// shoot
-		if (shooter_wait_count <= 25)
+		if (shooter_wait_count < 10)
 		{
 			VicCatapult.Set(-1);
 			shooter_wait_count++;
@@ -382,6 +380,10 @@ void Robot::TeleopPeriodic()
 	}
 	else
 		VicCatapult.Set(0);
+	
+	// todo remove
+	SmartDashboard::PutNumber("shooter_wait_count", (double) shooter_wait_count);
+	SmartDashboard::PutBoolean("shooting", shooting);
 
 	// --------------
 	// roller control
@@ -402,6 +404,9 @@ void Robot::TeleopPeriodic()
 	// ------------------
 	// roller arm control
 	// ------------------
+	
+	// todo kill switches
+	
 	if (Joystick2->Pressed(BUTTON_12))
 	{
 		// tell the Jaguar to lift arm at 50% voltage backwards
