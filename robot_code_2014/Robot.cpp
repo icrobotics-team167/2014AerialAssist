@@ -389,12 +389,12 @@ void Robot::TeleopPeriodic()
 	if (Joystick2->Pressed(BUTTON_10))
 	{
 		// tell the Jaguar to turn forward to pull ball in at 50% voltage forwards
-		JagRoller.Set(0.5);
+		JagRoller.Set(1.0);
 	}
 	else if (Joystick2->Pressed(BUTTON_9))
 	{
 		// tell the Jaguar to turn backwards to push ball out at 50% voltage backwards
-		JagRoller.Set(-0.5);
+		JagRoller.Set(-1.0);
 	}
 	else
 		JagRoller.Set(0);
