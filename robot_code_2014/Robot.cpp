@@ -346,7 +346,7 @@ void Robot::TeleopPeriodic()
 	// Note: catapult motor should be run backwards to cock the catapult (pull it back)
 	
 	// set cocked status of catapult based on current state of photo eye
-	catapult_cocked = CatapultPhotoEye.Get();
+	catapult_cocked = !CatapultPhotoEye.Get();
 	
 	// todo remove
 	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
