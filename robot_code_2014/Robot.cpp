@@ -405,12 +405,12 @@ void Robot::TeleopPeriodic()
 	if (Joystick2->Pressed(BUTTON_12))
 	{
 		// tell the Jaguar to lift arm at 50% voltage backwards
-		JagRollerArm.Set(-0.5);
+		JagRollerArm.Set(0.5);
 	}
 	else if (Joystick2->Pressed(BUTTON_11))
 	{
 		// tell the Jaguar to put down arm at 50% voltage forwards
-		JagRollerArm.Set(0.5);
+		JagRollerArm.Set(-0.5);
 	}
 	else
 		JagRollerArm.Set(0);
