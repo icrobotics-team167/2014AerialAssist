@@ -265,14 +265,14 @@ void Robot::TeleopPeriodic()
 		if (twist > 0)
 		{
 			// rotate right
-			dir = MechanumWheels::RotateRight;
+			dir = MechanumWheels::RotateLeft;
 			if (outputVolts < 2.0)
 				outputVolts = 2.0;
 		}
 		else
 		{
 			// rotate left
-			dir = MechanumWheels::RotateLeft;
+			dir = MechanumWheels::RotateRight;
 			if (outputVolts < 2.0)
 				outputVolts = 2.0;
 		}
@@ -280,12 +280,12 @@ void Robot::TeleopPeriodic()
 	else if (Joystick1->Pressed(BUTTON_4))
 	{
 			// rotate right
-			dir = MechanumWheels::RotateRight;
+			dir = MechanumWheels::RotateLeft;
 	}
 	else if (Joystick1->Pressed(BUTTON_3))
 	{
 		// rotate left
-		dir = MechanumWheels::RotateLeft;
+		dir = MechanumWheels::RotateRight;
 	}
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
 	{
@@ -346,7 +346,7 @@ void Robot::TeleopPeriodic()
 	// Note: catapult motor should be run backwards to cock the catapult (pull it back)
 	
 	// set cocked status of catapult based on current state of photo eye
-	catapult_cocked = !CatapultPhotoEye.Get();
+	catapult_cocked = CatapultPhotoEye.Get();
 	
 	// todo remove
 	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
@@ -364,7 +364,7 @@ void Robot::TeleopPeriodic()
 	else if (Joystick2->Toggled(BUTTON_1) && (catapult_cocked || shooting))
 	{
 		// shoot
-		if (shooter_wait_count < 10)
+		if (shooter_wait_count < 5)
 		{
 			VicCatapult.Set(-1);
 			shooter_wait_count++;
@@ -415,7 +415,7 @@ void Robot::TeleopPeriodic()
 	else if (Joystick2->Pressed(BUTTON_11))
 	{
 		// tell the Jaguar to put down arm at 50% voltage forwards
-		JagRollerArm.Set(-0.5);
+		JagRollerArm.Set(-0.4);
 	}
 	else
 		JagRollerArm.Set(0);
