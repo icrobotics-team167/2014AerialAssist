@@ -15,8 +15,8 @@ Robot::Robot() :
 	
 	CatapultPhotoEye(1),
 	
-	ArmDownSwitch(2),
-	ArmUpSwitch(3)
+	ArmDownSwitch(3),
+	ArmUpSwitch(2)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -418,15 +418,19 @@ void Robot::TeleopPeriodic()
 	// roller arm control
 	// ------------------
 	
-	bool arm_up = ArmUpSwitch.Get();
-	bool arm_down = ArmDownSwitch.Get();
+	bool arm_up = !ArmUpSwitch.Get();
+	bool arm_down = !ArmDownSwitch.Get();
+	
+	// todo remove
+	SmartDashboard::PutBoolean("arm up", arm_up);
+	SmartDashboard::PutBoolean("arm down", arm_down);
 	
 	if (Joystick2->Pressed(BUTTON_12) && !arm_up)
 	{
 		// tell the Jaguar to lift arm at 50% voltage backwards
 		JagRollerArm.Set(0.5);
 	}
-	else if (Joystick2->Pressed(BUTTON_11 && !arm_down))
+	else if (Joystick2->Pressed(BUTTON_11) && !arm_down)
 	{
 		// tell the Jaguar to put down arm at 50% voltage forwards
 		JagRollerArm.Set(-0.4);
