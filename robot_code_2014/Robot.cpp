@@ -226,6 +226,10 @@ void Robot::TeleopPeriodic()
 	// we use the raw axis because the default mappings are incorrect
 	float twist = this->RealJoy1->GetRawAxis(3);
 	
+	float thumbStickX = this->RealJoy1->GetRawAxis(5);
+	// note: -1 if pushed forward, 1 if pulled back
+	float thumbStickY = this->RealJoy1->GetRawAxis(6);
+	
 	// Set the throttle
 	bool turbo = Joystick1->Toggled(BUTTON_8);
 	
@@ -292,6 +296,26 @@ void Robot::TeleopPeriodic()
 	{
 		// rotate left
 		dir = MechanumWheels::RotateRight;
+	}
+	else if (thumbStickX == 1 && thumbStickY == -1)
+	{
+		// forward right diagonal
+		dir = MechanumWheels::FwdRight;
+	}
+	else if (thumbStickX == -1 && thumbStickY == -1)
+	{
+		// forward right diagonal
+		dir = MechanumWheels::FwdLeft;
+	}
+	else if (thumbStickX == 1 && thumbStickY == 1)
+	{
+		// forward right diagonal
+		dir = MechanumWheels::BackRight;
+	}
+	else if (thumbStickX == -1 && thumbStickY == 1)
+	{
+		// forward right diagonal
+		dir = MechanumWheels::BackLeft;
 	}
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
 	{
