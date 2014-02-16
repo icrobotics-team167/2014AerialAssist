@@ -13,10 +13,13 @@ Robot::Robot() :
 	JagRoller(25, CANJaguar::kPercentVbus),
 	JagRollerArm(26, CANJaguar::kPercentVbus),
 	
-	CatapultPhotoEye(1),
-	
 	ArmDownSwitch(3),
-	ArmUpSwitch(2)
+	ArmUpSwitch(2),
+	
+	CatapultPhotoEye(1),
+	CatapultCockWait(),
+	
+	ShootWait()
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -33,9 +36,6 @@ Robot::Robot() :
 	
 	// initialize catapult_cocked boolean to state of catapult photo eye
 	catapult_cocked = CatapultPhotoEye.Get();
-	
-	shooter_wait_count = 0;
-	shooting = false;
 	
 	return;
 }
@@ -77,6 +77,15 @@ void Robot::DisabledInit()
 	this->GetWatchdog().SetEnabled(false);
 	this->GetWatchdog().Feed();
 	this->GetWatchdog().SetExpiration(500);
+	
+	if (MechanumDrive)
+		this->MechanumDrive->Disable();
+	
+	CatapultCockWait.Stop();
+	CatapultCockWait.Reset();
+	
+	ShootWait.Stop();
+	ShootWait.Reset();
 	
 	return;
 }
@@ -362,41 +371,47 @@ void Robot::TeleopPeriodic()
 	
 	// todo remove
 	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
+	SmartDashboard::PutNumber("catapult timer", (double) CatapultCockWait.Get());
 	
-	if (Joystick2->Toggled(BUTTON_4) && !catapult_cocked)
+	if (Joystick2->Toggled(BUTTON_4) && (!catapult_cocked || (CatapultCockWait.Get() > 0 && CatapultCockWait.Get() < 5)))
 	{
 		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
 		VicCatapult.Set(-1);
+		
+		if (CatapultCockWait.Get() == 0)
+			CatapultCockWait.Start();
 	}
-	else if (Joystick2->Toggled(BUTTON_4) && catapult_cocked)
+	else if (Joystick2->Toggled(BUTTON_4) && (catapult_cocked || CatapultCockWait.Get() >= 5))
 	{
 		VicCatapult.Set(0);
 		Joystick2->DisableToggle(BUTTON_4);
+		CatapultCockWait.Stop();
 		// todo light up LEDs
 	}
-	else if (Joystick2->Toggled(BUTTON_1) && (catapult_cocked || shooting))
+	else if (Joystick2->Toggled(BUTTON_1) && catapult_cocked)
 	{
 		// shoot
-		if (shooter_wait_count < 5)
+		// todo use timer instead of loop counter
+		if (ShootWait.Get() < 20)
 		{
 			VicCatapult.Set(-1);
-			shooter_wait_count++;
-			shooting = true;
+			
+			if (ShootWait.Get() == 0)
+				ShootWait.Start();
 		}
 		else
 		{
 			VicCatapult.Set(0);
 			Joystick2->DisableToggle(BUTTON_1);
-			shooter_wait_count = 0;
-			shooting = false;
+			
+			ShootWait.Stop();
+			ShootWait.Reset();
 		}
+		
+		CatapultCockWait.Reset();
 	}
 	else
 		VicCatapult.Set(0);
-	
-	// todo remove
-	SmartDashboard::PutNumber("shooter_wait_count", (double) shooter_wait_count);
-	SmartDashboard::PutBoolean("shooting", shooting);
 
 	// --------------
 	// roller control

@@ -98,15 +98,14 @@ protected:
 	
 	MechanumWheels *MechanumDrive;
 	
-	DigitalInput CatapultPhotoEye;
-	
 	DigitalInput ArmDownSwitch;
 	DigitalInput ArmUpSwitch;
 
+	DigitalInput CatapultPhotoEye;
+	Timer CatapultCockWait;
 	bool catapult_cocked;
 	
-	int shooter_wait_count;
-	bool shooting;
+	Timer ShootWait;
 };
 
 #endif

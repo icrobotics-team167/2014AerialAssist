@@ -9,6 +9,8 @@
 
 #include "math.h"
 
+#include <Timer.h>
+
 #include "Team167Lib\Team167Lib.h"
 
 #include "Robot.h"
