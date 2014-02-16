@@ -34,8 +34,6 @@ Robot::Robot() :
 	shooter_wait_count = 0;
 	shooting = false;
 	
-	auto_drive_wait_count = 0;
-	
 	return;
 }
 
@@ -77,8 +75,6 @@ void Robot::DisabledInit()
 	this->GetWatchdog().Feed();
 	this->GetWatchdog().SetExpiration(500);
 	
-	auto_drive_wait_count = 0;
-	
 	return;
 }
 
@@ -113,7 +109,6 @@ void Robot::AutonomousInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
 	
-	/*
 	TargetReport target = getBestTarget(true, false);
 	SmartDashboard::PutBoolean("target hot", target.hot);
 	
@@ -132,7 +127,6 @@ void Robot::AutonomousInit()
 	// drive forward into our zone
 	MechanumDrive->SetMaxVoltage(4.0);
 	MechanumDrive->Move2Loc(MechanumWheels::Forward, 4.0);
-	*/
 
 	return;
 }
@@ -264,6 +258,9 @@ void Robot::TeleopPeriodic()
 	
 	if (outputVolts > 12.0)
 		outputVolts = 12.0;
+	
+	if (thumbStickX != 0 && thumbStickY != 0 && outputVolts < 8.0)
+		outputVolts = 8.0;
 
 	MechanumDrive->SetMaxVoltage(outputVolts);
 	
