@@ -34,6 +34,8 @@ Robot::Robot() :
 	shooter_wait_count = 0;
 	shooting = false;
 	
+	auto_drive_wait_count = 0;
+	
 	return;
 }
 
@@ -75,6 +77,8 @@ void Robot::DisabledInit()
 	this->GetWatchdog().Feed();
 	this->GetWatchdog().SetExpiration(500);
 	
+	auto_drive_wait_count = 0;
+	
 	return;
 }
 
@@ -109,6 +113,7 @@ void Robot::AutonomousInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
 	
+	/*
 	TargetReport target = getBestTarget(true, false);
 	SmartDashboard::PutBoolean("target hot", target.hot);
 	
@@ -127,6 +132,7 @@ void Robot::AutonomousInit()
 	// drive forward into our zone
 	MechanumDrive->SetMaxVoltage(4.0);
 	MechanumDrive->Move2Loc(MechanumWheels::Forward, 4.0);
+	*/
 
 	return;
 }
@@ -140,7 +146,7 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
 {
 	this->GetWatchdog().Feed();
-	
+
 	return;
 }
 
@@ -292,45 +298,25 @@ void Robot::TeleopPeriodic()
 		// stop
 		dir = MechanumWheels::Stop;
 	}
-	else if (z >= 247.5 && z < 292.5)
+	else if (z >= 225 && z < 315)
 	{
 		// forward
 		dir = MechanumWheels::Forward;
 	}
-	else if (z >= 292.5 && z < 337.5)
-	{
-		// forward right diagonal
-		dir = MechanumWheels::FwdLeft;
-	}
-	else if ((z >= 337.5 && z <= 360) || (z >= 0 && z < 22.5))
+	else if ((z >= 315 && z <= 360) || (z >= 0 && z < 45))
 	{
 		// right
 		dir = MechanumWheels::Left;
 	}
-	else if (z >= 22.5 && z < 67.5)
-	{
-		// backward right diagonal
-		dir = MechanumWheels::BackLeft;
-	}
-	else if(z >= 67.5 && z < 112.5)
+	else if(z >= 45 && z < 135)
 	{
 		// backward
 		dir = MechanumWheels::Reverse;
 	}
-	else if (z >= 112.5 && z < 157.5)
-	{
-		// backward left diagonal
-		dir = MechanumWheels::BackRight;
-	}
-	else if (z >= 157.5 && z < 202.5)
+	else if (z >= 135 && z < 225)
 	{
 		// left
 		dir = MechanumWheels::Right;
-	}
-	else if (z >= 202.5 && z < 247.5)
-	{
-		// forward left diagonal
-		dir = MechanumWheels::FwdRight;
 	}
 	else
 	{
@@ -364,7 +350,7 @@ void Robot::TeleopPeriodic()
 	else if (Joystick2->Toggled(BUTTON_1) && (catapult_cocked || shooting))
 	{
 		// shoot
-		if (shooter_wait_count < 5)
+		if (shooter_wait_count < 10)
 		{
 			VicCatapult.Set(-1);
 			shooter_wait_count++;
