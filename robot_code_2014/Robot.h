@@ -99,6 +99,9 @@ protected:
 	MechanumWheels *MechanumDrive;
 	
 	DigitalInput CatapultPhotoEye;
+	
+	DigitalInput ArmDownSwitch;
+	DigitalInput ArmUpSwitch;
 
 	bool catapult_cocked;
 	

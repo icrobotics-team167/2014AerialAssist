@@ -13,7 +13,10 @@ Robot::Robot() :
 	JagRoller(25, CANJaguar::kPercentVbus),
 	JagRollerArm(26, CANJaguar::kPercentVbus),
 	
-	CatapultPhotoEye(1)
+	CatapultPhotoEye(1),
+	
+	ArmDownSwitch(2),
+	ArmUpSwitch(3)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -109,6 +112,7 @@ void Robot::AutonomousInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
 	
+	/*
 	TargetReport target = getBestTarget(true, false);
 	SmartDashboard::PutBoolean("target hot", target.hot);
 	
@@ -123,9 +127,10 @@ void Robot::AutonomousInit()
 	Wait(2.0);
 	VicCatapult.Set(0);
 	Wait(0.5);
+	*/
 	
 	// drive forward into our zone
-	MechanumDrive->SetMaxVoltage(4.0);
+	MechanumDrive->SetMaxVoltage(7.0);
 	MechanumDrive->Move2Loc(MechanumWheels::Forward, 4.0);
 
 	return;
@@ -187,7 +192,7 @@ void Robot::SetPIDs()
  * TeleopPeriodic is called about once every 20 ms; it is synchronized with updates from the Driver Station
  */
 void Robot::TeleopPeriodic()
-{
+{	
 	this->GetWatchdog().Feed();
 	this->Joystick1->Update();
 	this->Joystick2->Update();
@@ -349,11 +354,11 @@ void Robot::TeleopPeriodic()
 	// catapult control
 	// ----------------
 	
-	// CANNOT run catapult backwards (CANNOT decock)
+	// CANNOT decock catapult
 	// Note: catapult motor should be run backwards to cock the catapult (pull it back)
 	
 	// set cocked status of catapult based on current state of photo eye
-	catapult_cocked = CatapultPhotoEye.Get();
+	catapult_cocked = !CatapultPhotoEye.Get();
 	
 	// todo remove
 	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
@@ -367,11 +372,12 @@ void Robot::TeleopPeriodic()
 	{
 		VicCatapult.Set(0);
 		Joystick2->DisableToggle(BUTTON_4);
+		// todo light up LEDs
 	}
 	else if (Joystick2->Toggled(BUTTON_1) && (catapult_cocked || shooting))
 	{
 		// shoot
-		if (shooter_wait_count < 10)
+		if (shooter_wait_count < 5)
 		{
 			VicCatapult.Set(-1);
 			shooter_wait_count++;
@@ -412,14 +418,15 @@ void Robot::TeleopPeriodic()
 	// roller arm control
 	// ------------------
 	
-	// todo kill switches
+	bool arm_up = ArmUpSwitch.Get();
+	bool arm_down = ArmDownSwitch.Get();
 	
-	if (Joystick2->Pressed(BUTTON_12))
+	if (Joystick2->Pressed(BUTTON_12) && !arm_up)
 	{
 		// tell the Jaguar to lift arm at 50% voltage backwards
 		JagRollerArm.Set(0.5);
 	}
-	else if (Joystick2->Pressed(BUTTON_11))
+	else if (Joystick2->Pressed(BUTTON_11 && !arm_down))
 	{
 		// tell the Jaguar to put down arm at 50% voltage forwards
 		JagRollerArm.Set(-0.4);
