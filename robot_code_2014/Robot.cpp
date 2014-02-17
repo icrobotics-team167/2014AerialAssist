@@ -121,6 +121,8 @@ void Robot::AutonomousInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
 	
+	// todo put arm down
+	
 	/*
 	TargetReport target = getBestTarget(true, false);
 	SmartDashboard::PutBoolean("target hot", target.hot);
@@ -140,7 +142,7 @@ void Robot::AutonomousInit()
 	
 	// drive forward into our zone
 	MechanumDrive->SetMaxVoltage(7.0);
-	MechanumDrive->Move2Loc(MechanumWheels::Forward, 4.0);
+	MechanumDrive->Move2Loc(MechanumWheels::Reverse, 20.0);
 
 	return;
 }
@@ -440,15 +442,17 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("arm up", arm_up);
 	SmartDashboard::PutBoolean("arm down", arm_down);
 	
-	if (Joystick2->Pressed(BUTTON_12) && !arm_up)
+	float armJoyY = -this->RealJoy2->GetAxis(Joystick::kYAxis);
+	
+	if (armJoyY < 0 && !arm_up)
 	{
 		// tell the Jaguar to lift arm at 50% voltage backwards
-		JagRollerArm.Set(0.5);
+		JagRollerArm.Set(-0.5 * armJoyY);
 	}
-	else if (Joystick2->Pressed(BUTTON_11) && !arm_down)
+	else if (armJoyY > 0 && !arm_down)
 	{
 		// tell the Jaguar to put down arm at 50% voltage forwards
-		JagRollerArm.Set(-0.4);
+		JagRollerArm.Set(-0.5 * armJoyY);
 	}
 	else
 		JagRollerArm.Set(0);

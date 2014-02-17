@@ -52,9 +52,7 @@ MechanumWheels::~MechanumWheels()
 	// relase the pointers that we have
 	for(int i = 0;i < 4;i++)
 		Wheels[i] = NULL;
-	
-	
-	
+
 	return;
 }
 
@@ -262,7 +260,6 @@ void MechanumWheels::Move2Loc(DriveDir dir, float dist)
 
 	_driveTimeout = 0;
 
-		
 //	float current_pos[4]={0,0,0,0};
 	for(int i=0;i<4;i++)
 	{
@@ -413,10 +410,8 @@ void MechanumWheels::Move2Loc(DriveDir dir, float dist)
 		{
 			if(i == FL_JAG || i == BR_JAG)
 			{
-
-					_tgt_pos[i]=_cur_pos[i]+dist;
-					_need_update[i] = true;
-
+				_tgt_pos[i]=_cur_pos[i]+dist;
+				_need_update[i] = true;
 			}
 		}
 	}
@@ -426,20 +421,15 @@ void MechanumWheels::Move2Loc(DriveDir dir, float dist)
 	{
 		for(int i = 0;i < 4;i++)
 		{
-			
 			_tgt_pos[i] = _cur_pos[i];
 			
 			if(Wheels[i]->GetPosition() == _tgt_pos[i])
 				continue;
 			else
 				_need_update[i] = true;
-			
-			
 		}
 	}
 
-	
-	
 	//---------------------------------------------------------------------
 	// Set the voltage
 	//---------------------------------------------------------------------
