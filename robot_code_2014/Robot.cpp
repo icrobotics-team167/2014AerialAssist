@@ -17,7 +17,6 @@ Robot::Robot() :
 	ArmUpSwitch(2),
 	
 	CatapultPhotoEye(1),
-	CatapultCockWait(),
 	
 	ShootWait(),
 	
@@ -85,9 +84,6 @@ void Robot::DisabledInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Disable();
 	
-	CatapultCockWait.Stop();
-	CatapultCockWait.Reset();
-	
 	ShootWait.Stop();
 	ShootWait.Reset();
 	
@@ -95,6 +91,8 @@ void Robot::DisabledInit()
 	AutoDriveTimer.Reset();
 	AutoShootTimer.Stop();
 	AutoShootTimer.Reset();
+	WaitForHot.Stop();
+	WaitForHot.Reset();
 	
 	return;
 }
@@ -248,9 +246,6 @@ void Robot::TeleopInit()
 	
 	this->MechanumDrive->Enable();
 	
-	CatapultCockWait.Stop();
-	CatapultCockWait.Reset();
-	
 	ShootWait.Stop();
 	ShootWait.Reset();
 	
@@ -258,6 +253,8 @@ void Robot::TeleopInit()
 	AutoDriveTimer.Reset();
 	AutoShootTimer.Stop();
 	AutoShootTimer.Reset();
+	WaitForHot.Stop();
+	WaitForHot.Reset();
 	
 	return;
 }
@@ -458,22 +455,17 @@ void Robot::TeleopPeriodic()
 	
 	// todo remove
 	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
-	SmartDashboard::PutNumber("catapult timer", (double) CatapultCockWait.Get());
 	
 	// todo just stop immediately after tripping the photo eye
-	if (Joystick2->Toggled(BUTTON_4) && (!catapult_cocked || (CatapultCockWait.Get() > 0 && CatapultCockWait.Get() < 5)))
-	{
-		if (CatapultCockWait.Get() == 0)
-			CatapultCockWait.Start();
-		
+	if (Joystick2->Toggled(BUTTON_4) && !catapult_cocked)
+	{	
 		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
 		VicCatapult.Set(-1);
 	}
-	else if (Joystick2->Toggled(BUTTON_4) && (catapult_cocked || CatapultCockWait.Get() >= 5))
+	else if (Joystick2->Toggled(BUTTON_4) && catapult_cocked)
 	{
 		VicCatapult.Set(0);
 		Joystick2->DisableToggle(BUTTON_4);
-		CatapultCockWait.Stop();
 		// todo light up LEDs
 	}
 	else if (Joystick2->Toggled(BUTTON_1) && catapult_cocked)
@@ -495,8 +487,6 @@ void Robot::TeleopPeriodic()
 			ShootWait.Stop();
 			ShootWait.Reset();
 		}
-		
-		CatapultCockWait.Reset();
 	}
 	else
 		VicCatapult.Set(0);
