@@ -106,6 +106,9 @@ protected:
 	bool catapult_cocked;
 	
 	Timer ShootWait;
+	
+	Timer AutoDriveTimer;
+	Timer AutoShootTimer;
 };
 
 #endif

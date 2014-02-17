@@ -19,7 +19,10 @@ Robot::Robot() :
 	CatapultPhotoEye(1),
 	CatapultCockWait(),
 	
-	ShootWait()
+	ShootWait(),
+	
+	AutoDriveTimer(),
+	AutoShootTimer()
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -87,6 +90,11 @@ void Robot::DisabledInit()
 	ShootWait.Stop();
 	ShootWait.Reset();
 	
+	AutoDriveTimer.Stop();
+	AutoDriveTimer.Reset();
+	AutoShootTimer.Stop();
+	AutoShootTimer.Reset();
+	
 	return;
 }
 
@@ -121,7 +129,9 @@ void Robot::AutonomousInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
 	
-	// todo put arm down
+	this->MechanumDrive->SetMaxVoltage(7.0);
+	
+	// todo make target a member variable so AutonomousPeriodic can access it
 	
 	/*
 	TargetReport target = getBestTarget(true, false);
@@ -139,10 +149,6 @@ void Robot::AutonomousInit()
 	VicCatapult.Set(0);
 	Wait(0.5);
 	*/
-	
-	// drive forward into our zone
-	MechanumDrive->SetMaxVoltage(7.0);
-	MechanumDrive->Move2Loc(MechanumWheels::Reverse, 20.0);
 
 	return;
 }
@@ -156,6 +162,34 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
 {
 	this->GetWatchdog().Feed();
+	
+	MechanumWheels::DriveDir dir = MechanumWheels::Stop;
+	
+	if (AutoDriveTimer.Get() < 2000)
+	{
+		if (AutoDriveTimer.Get() == 0)
+			AutoDriveTimer.Start();
+		
+		dir = MechanumWheels::Forward;
+		
+		// drive forward
+		MechanumDrive->CheckComplete();
+		MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
+		
+		if (task == MechanumWheels::ManualDrive ||
+			task == MechanumWheels::TaskFinished || 
+			task == MechanumWheels::Stop)
+		{
+			MechanumDrive->Update(dir);
+		}
+		else
+		{
+			// currently in a task
+			MechanumDrive->FeedJags();
+		}
+	}
+	else
+		MechanumDrive->Update(MechanumWheels::Stop);
 
 	return;
 }
@@ -173,6 +207,17 @@ void Robot::TeleopInit()
 	this->GetWatchdog().Feed();
 	
 	this->MechanumDrive->Enable();
+	
+	CatapultCockWait.Stop();
+	CatapultCockWait.Reset();
+	
+	ShootWait.Stop();
+	ShootWait.Reset();
+	
+	AutoDriveTimer.Stop();
+	AutoDriveTimer.Reset();
+	AutoShootTimer.Stop();
+	AutoShootTimer.Reset();
 	
 	return;
 }
@@ -377,11 +422,11 @@ void Robot::TeleopPeriodic()
 	
 	if (Joystick2->Toggled(BUTTON_4) && (!catapult_cocked || (CatapultCockWait.Get() > 0 && CatapultCockWait.Get() < 5)))
 	{
-		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
-		VicCatapult.Set(-1);
-		
 		if (CatapultCockWait.Get() == 0)
 			CatapultCockWait.Start();
+		
+		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
+		VicCatapult.Set(-1);
 	}
 	else if (Joystick2->Toggled(BUTTON_4) && (catapult_cocked || CatapultCockWait.Get() >= 5))
 	{
