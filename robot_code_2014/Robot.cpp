@@ -22,7 +22,8 @@ Robot::Robot() :
 	ShootWait(),
 	
 	AutoDriveTimer(),
-	AutoShootTimer()
+	AutoShootTimer(),
+	WaitForHot()
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -131,24 +132,11 @@ void Robot::AutonomousInit()
 	
 	this->MechanumDrive->SetMaxVoltage(7.0);
 	
-	// todo make target a member variable so AutonomousPeriodic can access it
-	
-	/*
-	TargetReport target = getBestTarget(true, false);
-	SmartDashboard::PutBoolean("target hot", target.hot);
+	autoTarget = getBestTarget(true, false);
+	SmartDashboard::PutBoolean("target hot", autoTarget.hot);
 	
 	// if the best target found is NOT hot, wait until it is before proceeding
 	// with autonomous mode
-	if (!target.hot)
-		Wait(4.0);
-	
-	// catapult will start decocked
-	// shoot
-	VicCatapult.Set(-1);
-	Wait(2.0);
-	VicCatapult.Set(0);
-	Wait(0.5);
-	*/
 
 	return;
 }
@@ -165,6 +153,7 @@ void Robot::AutonomousPeriodic()
 	
 	MechanumWheels::DriveDir dir = MechanumWheels::Stop;
 	
+	// drive for 2 seconds
 	if (AutoDriveTimer.Get() < 2000)
 	{
 		if (AutoDriveTimer.Get() == 0)
@@ -189,7 +178,58 @@ void Robot::AutonomousPeriodic()
 		}
 	}
 	else
+	{
 		MechanumDrive->Update(MechanumWheels::Stop);
+		AutoDriveTimer.Stop();
+	}
+	
+	catapult_cocked = !CatapultPhotoEye.Get();
+	
+	// if the target is hot, shoot while driving
+	if (autoTarget.hot)
+	{
+		if (!catapult_cocked && AutoShootTimer.Get() == 0)
+			VicCatapult.Set(-1);
+		else if (catapult_cocked && AutoShootTimer.Get() < 20)
+		{
+			if (AutoShootTimer.Get() == 0)
+				AutoShootTimer.Start();
+			
+			VicCatapult.Set(-1);
+		}
+		else
+		{
+			VicCatapult.Set(0);
+			AutoShootTimer.Stop();
+		}
+	}
+	// if the target is not hot and we're done driving, wait 1 second, then shoot
+	else if (AutoDriveTimer.Get() >= 2000)
+	{
+		if (WaitForHot.Get() == 0)
+			WaitForHot.Start();
+		
+		// time to shoot
+		if (WaitForHot.Get() >= 1000)
+		{
+			if (!catapult_cocked && AutoShootTimer.Get() == 0)
+				VicCatapult.Set(-1);
+			else if (catapult_cocked && AutoShootTimer.Get() < 20)
+			{
+				if (AutoShootTimer.Get() == 0)
+					AutoShootTimer.Start();
+				
+				VicCatapult.Set(-1);
+			}
+			else
+			{
+				VicCatapult.Set(0);
+				AutoShootTimer.Stop();
+			}
+		}
+	}
+	else
+		VicCatapult.Set(0);
 
 	return;
 }
@@ -420,6 +460,7 @@ void Robot::TeleopPeriodic()
 	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
 	SmartDashboard::PutNumber("catapult timer", (double) CatapultCockWait.Get());
 	
+	// todo just stop immediately after tripping the photo eye
 	if (Joystick2->Toggled(BUTTON_4) && (!catapult_cocked || (CatapultCockWait.Get() > 0 && CatapultCockWait.Get() < 5)))
 	{
 		if (CatapultCockWait.Get() == 0)

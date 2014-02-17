@@ -109,6 +109,9 @@ protected:
 	
 	Timer AutoDriveTimer;
 	Timer AutoShootTimer;
+	Timer WaitForHot;
+	
+	TargetReport autoTarget;
 };
 
 #endif
