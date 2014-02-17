@@ -94,6 +94,8 @@ void Robot::DisabledInit()
 	WaitForHot.Stop();
 	WaitForHot.Reset();
 	
+	this->Joystick2->DisableToggle(BUTTON_4);
+	
 	return;
 }
 
