@@ -6,8 +6,8 @@
 
 //Camera constants used for distance calculation
 // todo recalibrate view angle for Axix M1013
-#define Y_IMAGE_RES 480		// Y Image resolution in pixels, should be 120, 240 or 480
-#define VIEW_ANGLE 35.489		// Axis M1011
+#define Y_IMAGE_RES 240		// Y Image resolution in pixels, should be 120, 240 or 480
+#define VIEW_ANGLE 50.144	// Axis M1013
 
 //Score limits used for target identification
 #define RECTANGULARITY_LIMIT 40
