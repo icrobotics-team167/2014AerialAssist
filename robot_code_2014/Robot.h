@@ -112,8 +112,6 @@ protected:
 	Timer ShootWait;
 	
 	Timer AutoDriveTimer;
-	Timer AutoShootTimer;
-	Timer WaitForHot;
 	
 	TargetReport autoTarget;
 	

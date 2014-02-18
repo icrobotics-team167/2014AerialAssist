@@ -21,9 +21,7 @@ Robot::Robot() :
 	ExtraCockWait(),
 	ShootWait(),
 	
-	AutoDriveTimer(),
-	AutoShootTimer(),
-	WaitForHot()
+	AutoDriveTimer()
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -92,13 +90,8 @@ void Robot::DisabledInit()
 	
 	AutoDriveTimer.Stop();
 	AutoDriveTimer.Reset();
-	AutoShootTimer.Stop();
-	AutoShootTimer.Reset();
-	WaitForHot.Stop();
-	WaitForHot.Reset();
 	
-	this->Joystick2->DisableToggle(BUTTON_4);
-	this->Joystick1->DisableToggle(BUTTON_1);
+	// todo disable ALL toggles: add function to SimpleJoystick
 	
 	return;
 }
@@ -136,11 +129,53 @@ void Robot::AutonomousInit()
 	
 	this->MechanumDrive->SetMaxVoltage(7.0);
 	
-	autoTarget = getBestTarget(true, false);
-	SmartDashboard::PutBoolean("target hot", autoTarget.hot);
+	// cock the catapult extra
+	VicCatapult.Set(-1);
+	Wait(0.01);
+	VicCatapult.Set(0);
 	
-	// if the best target found is NOT hot, wait until it is before proceeding
-	// with autonomous mode
+	// get the vision target (to check if it's hot)
+	autoTarget = getBestTarget(true, false);
+	
+	// drive for 2 seconds
+	while (AutoDriveTimer.Get() < 2000)
+	{
+		if (AutoDriveTimer.Get() == 0)
+			AutoDriveTimer.Start();
+		
+		// drive forward
+		MechanumDrive->CheckComplete();
+		MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
+		
+		if (task == MechanumWheels::ManualDrive ||
+			task == MechanumWheels::TaskFinished || 
+			task == MechanumWheels::Stop)
+		{
+			MechanumDrive->Update(MechanumWheels::Forward);
+		}
+		else
+		{
+			// currently in a task
+			MechanumDrive->FeedJags();
+		}
+	}
+	
+	MechanumDrive->Update(MechanumWheels::Stop);
+	AutoDriveTimer.Stop();
+	
+	// put the arm down
+	JagRollerArm.Set(-0.5);
+	Wait(0.5);
+	JagRollerArm.Set(0);
+	
+	// if the target is NOT hot, wait until it is before shooting
+	if (!autoTarget.hot)
+		Wait(1.0);
+	
+	// shoot
+	VicCatapult.Set(-1);
+	Wait(0.01);
+	VicCatapult.Set(0);
 
 	return;
 }
@@ -154,88 +189,6 @@ void Robot::AutonomousInit()
 void Robot::AutonomousPeriodic()
 {
 	this->GetWatchdog().Feed();
-	
-	MechanumWheels::DriveDir dir = MechanumWheels::Stop;
-	
-	// drive for 2 seconds
-	if (AutoDriveTimer.Get() < 2000)
-	{
-		if (AutoDriveTimer.Get() == 0)
-			AutoDriveTimer.Start();
-		
-		dir = MechanumWheels::Forward;
-		
-		// drive forward
-		MechanumDrive->CheckComplete();
-		MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
-		
-		if (task == MechanumWheels::ManualDrive ||
-			task == MechanumWheels::TaskFinished || 
-			task == MechanumWheels::Stop)
-		{
-			MechanumDrive->Update(dir);
-		}
-		else
-		{
-			// currently in a task
-			MechanumDrive->FeedJags();
-		}
-	}
-	else
-	{
-		MechanumDrive->Update(MechanumWheels::Stop);
-		AutoDriveTimer.Stop();
-	}
-	
-	/*
-	catapult_cocked = !CatapultPhotoEye.Get();
-	
-	// if the target is hot, shoot while driving
-	if (autoTarget.hot)
-	{
-		if (!catapult_cocked && AutoShootTimer.Get() == 0)
-			VicCatapult.Set(-1);
-		else if (catapult_cocked && AutoShootTimer.Get() < 20)
-		{
-			if (AutoShootTimer.Get() == 0)
-				AutoShootTimer.Start();
-			
-			VicCatapult.Set(-1);
-		}
-		else
-		{
-			VicCatapult.Set(0);
-			AutoShootTimer.Stop();
-		}
-	}
-	// if the target is not hot and we're done driving, wait 1 second, then shoot
-	else if (AutoDriveTimer.Get() >= 2000)
-	{
-		if (WaitForHot.Get() == 0)
-			WaitForHot.Start();
-		
-		// time to shoot
-		if (WaitForHot.Get() >= 1000)
-		{
-			if (!catapult_cocked && AutoShootTimer.Get() == 0)
-				VicCatapult.Set(-1);
-			else if (catapult_cocked && AutoShootTimer.Get() < 20)
-			{
-				if (AutoShootTimer.Get() == 0)
-					AutoShootTimer.Start();
-				
-				VicCatapult.Set(-1);
-			}
-			else
-			{
-				VicCatapult.Set(0);
-				AutoShootTimer.Stop();
-			}
-		}
-	}
-	else
-		VicCatapult.Set(0);
-	*/
 
 	return;
 }
@@ -259,13 +212,6 @@ void Robot::TeleopInit()
 	
 	AutoDriveTimer.Stop();
 	AutoDriveTimer.Reset();
-	AutoShootTimer.Stop();
-	AutoShootTimer.Reset();
-	WaitForHot.Stop();
-	WaitForHot.Reset();
-	
-	Joystick2->DisableToggle(BUTTON_4);
-	Joystick2->DisableToggle(BUTTON_1);
 	
 	return;
 }
@@ -556,50 +502,6 @@ void Robot::TeleopPeriodic()
 		
 		break;
 	}
-	
-	/*
-	// todo remove
-	SmartDashboard::PutBoolean("button 1 toggled", Joystick2->Toggled(BUTTON_1));
-	
-	// todo just stop immediately after tripping the photo eye
-	if (Joystick2->Toggled(BUTTON_4) && !catapult_cocked)
-	{	
-		// tell the Jaguar to run the catapult cocking motor at 100% voltage backwards
-		VicCatapult.Set(-1);
-	}
-	else if (Joystick2->Toggled(BUTTON_4) && catapult_cocked)
-	{
-		VicCatapult.Set(0);
-		Joystick2->DisableToggle(BUTTON_4);
-		// todo light up LEDs
-	}
-	else if (Joystick2->Toggled(BUTTON_1) && catapult_cocked)
-	{
-		// shoot
-		// todo use timer instead of loop counter
-		if (ShootWait.Get() < 20)
-		{
-			VicCatapult.Set(-1);
-			
-			if (ShootWait.Get() == 0)
-				ShootWait.Start();
-		}
-		else
-		{
-			VicCatapult.Set(0);
-			Joystick2->DisableToggle(BUTTON_1);
-			
-			ShootWait.Stop();
-			ShootWait.Reset();
-		}
-	}
-	else
-	{
-		VicCatapult.Set(0);
-		Joystick2->DisableToggle(BUTTON_4);
-		Joystick2->DisableToggle(BUTTON_1);
-	}
-	*/
 
 	// --------------
 	// roller control
