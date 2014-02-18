@@ -14,6 +14,8 @@ public:
 	void EnableToggle(UINT32 button);
 	void DisableToggle(UINT32 button);
 	
+	// untoggles ALL buttons (Toggled will return false)
+	void DisableToggleAll();
 	
 public:
 	static const UINT32 NumButtons = 12;

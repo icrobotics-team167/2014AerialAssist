@@ -119,3 +119,8 @@ void SimpleJoystick::DisableToggle(UINT32 button)
 {
 	_toggledButtons = _toggledButtons & ~button;
 }
+
+void SimpleJoystick::DisableToggleAll()
+{
+	_toggledButtons = 0;
+}
