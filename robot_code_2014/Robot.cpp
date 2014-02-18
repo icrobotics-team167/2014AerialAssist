@@ -18,6 +18,7 @@ Robot::Robot() :
 	
 	CatapultPhotoEye(1),
 	
+	ExtraCockWait(),
 	ShootWait(),
 	
 	AutoDriveTimer(),
@@ -38,7 +39,9 @@ Robot::Robot() :
 	MechanumDrive->Init(true);
 	
 	// initialize catapult_cocked boolean to state of catapult photo eye
-	catapult_cocked = CatapultPhotoEye.Get();
+	photoeye_tripped = !CatapultPhotoEye.Get();
+	
+	state = Default;
 	
 	return;
 }
@@ -184,6 +187,7 @@ void Robot::AutonomousPeriodic()
 		AutoDriveTimer.Stop();
 	}
 	
+	/*
 	catapult_cocked = !CatapultPhotoEye.Get();
 	
 	// if the target is hot, shoot while driving
@@ -231,6 +235,7 @@ void Robot::AutonomousPeriodic()
 	}
 	else
 		VicCatapult.Set(0);
+	*/
 
 	return;
 }
@@ -457,10 +462,102 @@ void Robot::TeleopPeriodic()
 	// Note: catapult motor should be run backwards to cock the catapult (pull it back)
 	
 	// set cocked status of catapult based on current state of photo eye
-	catapult_cocked = !CatapultPhotoEye.Get();
+	photoeye_tripped = !CatapultPhotoEye.Get();
 	
-	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
+	switch (state)
+	{
+	case Off_Not_Cocked:
+		VicCatapult.Set(0);
+		
+		SmartDashboard::PutBoolean("catapult cocked", false);
+		
+		if (Joystick2->Pressed(BUTTON_7))
+			state = On_Not_Cocked_1;
+		else if (Joystick2->Pressed(BUTTON_4))
+			state = On_Not_Cocked_2;
+		
+		break;
+		
+	case On_Not_Cocked_1:
+		VicCatapult.Set(-1);
+		
+		SmartDashboard::PutBoolean("catapult cocked", false);
+		
+		if (Joystick2->Pressed(BUTTON_7) && !photoeye_tripped)
+			state = Off_Not_Cocked;
+		else if (photoeye_tripped)
+			state = Off_Cocked;
+		
+		break;
+		
+	case On_Not_Cocked_2:
+		VicCatapult.Set(-1);
+		
+		SmartDashboard::PutBoolean("catapult cocked", false);
+		
+		if (photoeye_tripped)
+			state = Extra_Cock_Time;
+		else if (Joystick2->Pressed(BUTTON_4) && !photoeye_tripped)
+			state = Off_Not_Cocked;
+		
+		break;
+		
+	case Extra_Cock_Time:
+		VicCatapult.Set(-1);
+		
+		SmartDashboard::PutBoolean("catapult cocked", false);
+		
+		if (ExtraCockWait.Get() == 0)
+			ExtraCockWait.Start();
+		else if (ExtraCockWait.Get() >= 10)
+		{
+			ExtraCockWait.Stop();
+			ExtraCockWait.Reset();
+			state = Off_Cocked;
+		}
+		
+		break;
+		
+	case Off_Cocked:
+		VicCatapult.Set(0);
+		
+		SmartDashboard::PutBoolean("catapult cocked", true);
+		
+		if (Joystick2->Pressed(BUTTON_1))
+			state = Firing;
+		
+		break;
+		
+	case Firing:
+		VicCatapult.Set(-1);
+		
+		SmartDashboard::PutBoolean("catapult cocked", true);
+		
+		if (Joystick2->Pressed(BUTTON_1) && ShootWait.Get() < 20)
+			state = Off_Cocked;
+		else if (ShootWait.Get() == 0)
+			ShootWait.Start();
+		else if (ShootWait.Get() >= 20)
+		{
+			ShootWait.Stop();
+			ShootWait.Reset();
+			state = Off_Not_Cocked;
+		}
+		
+		break;
+		
+	default:
+		VicCatapult.Set(0);
+		
+		if (photoeye_tripped)
+			state = Off_Cocked;
+		else
+			state = Off_Not_Cocked;
+		
+		break;
+	}
 	
+	/*
 	// todo remove
 	SmartDashboard::PutBoolean("button 1 toggled", Joystick2->Toggled(BUTTON_1));
 	
@@ -502,6 +599,7 @@ void Robot::TeleopPeriodic()
 		Joystick2->DisableToggle(BUTTON_4);
 		Joystick2->DisableToggle(BUTTON_1);
 	}
+	*/
 
 	// --------------
 	// roller control

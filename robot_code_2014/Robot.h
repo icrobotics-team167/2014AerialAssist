@@ -28,8 +28,12 @@ class Robot : public IterativeRobot
 {
 public:
 	
-	//tasks robot can do
+	// tasks robot can do
 	typedef enum {TaskFinished=12, Pickup=13, Shoot=14, Slowdown=15} Task;
+	
+	// states
+	typedef enum { Off_Not_Cocked = 0, On_Not_Cocked_1 = 1, On_Not_Cocked_2 = 2,
+					Extra_Cock_Time = 3, Off_Cocked = 4, Firing = 5, Default = 99 } State;
 	
 	Robot();
 	~Robot();
@@ -102,8 +106,9 @@ protected:
 	DigitalInput ArmUpSwitch;
 
 	DigitalInput CatapultPhotoEye;
-	bool catapult_cocked;
+	bool photoeye_tripped;
 	
+	Timer ExtraCockWait;
 	Timer ShootWait;
 	
 	Timer AutoDriveTimer;
@@ -111,6 +116,8 @@ protected:
 	Timer WaitForHot;
 	
 	TargetReport autoTarget;
+	
+	State state;
 };
 
 #endif
