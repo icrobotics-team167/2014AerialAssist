@@ -87,9 +87,10 @@ void Robot::DisabledInit()
 	
 	ShootWait.Stop();
 	ShootWait.Reset();
-	
 	AutoDriveTimer.Stop();
 	AutoDriveTimer.Reset();
+	ExtraCockWait.Stop();
+	ExtraCockWait.Reset();
 	
 	// todo disable ALL toggles: add function to SimpleJoystick
 	
@@ -209,9 +210,10 @@ void Robot::TeleopInit()
 	
 	ShootWait.Stop();
 	ShootWait.Reset();
-	
 	AutoDriveTimer.Stop();
 	AutoDriveTimer.Reset();
+	ExtraCockWait.Stop();
+	ExtraCockWait.Reset();
 	
 	return;
 }
