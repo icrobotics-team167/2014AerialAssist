@@ -19,10 +19,7 @@ Robot::Robot() :
 	CatapultPhotoEye(1),
 	
 	ExtraCockWait(),
-	ShootWait(),
-	
-	AutoDriveTimer(),
-	AutoArmDownTimer()
+	ShootWait()
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -89,10 +86,6 @@ void Robot::DisabledInit()
 	// reset timers
 	ShootWait.Stop();
 	ShootWait.Reset();
-	AutoDriveTimer.Stop();
-	AutoDriveTimer.Reset();
-	AutoArmDownTimer.Stop();
-	AutoArmDownTimer.Reset();
 	ExtraCockWait.Stop();
 	ExtraCockWait.Reset();
 	
@@ -145,6 +138,8 @@ void Robot::AutonomousInit()
 	autoTarget = getBestTarget(true, false);
 	
 	// drive for 2 seconds
+	Timer AutoDriveTimer;
+	
 	while (AutoDriveTimer.Get() < 2000)
 	{
 		if (AutoDriveTimer.Get() == 0)
@@ -171,6 +166,7 @@ void Robot::AutonomousInit()
 	AutoDriveTimer.Stop();
 	
 	// put the arm down
+	Timer AutoArmDownTimer;
 	bool arm_down = !ArmDownSwitch.Get();
 	
 	while (AutoArmDownTimer.Get() < 500 && !arm_down)
@@ -228,10 +224,6 @@ void Robot::TeleopInit()
 	// reset timers
 	ShootWait.Stop();
 	ShootWait.Reset();
-	AutoDriveTimer.Stop();
-	AutoDriveTimer.Reset();
-	AutoArmDownTimer.Stop();
-	AutoArmDownTimer.Reset();
 	ExtraCockWait.Stop();
 	ExtraCockWait.Reset();
 	

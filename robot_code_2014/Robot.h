@@ -111,9 +111,6 @@ protected:
 	Timer ExtraCockWait;
 	Timer ShootWait;
 	
-	Timer AutoDriveTimer;
-	Timer AutoArmDownTimer;
-	
 	TargetReport autoTarget;
 	
 	State state;
