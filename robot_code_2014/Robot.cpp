@@ -85,6 +85,7 @@ void Robot::DisabledInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Disable();
 	
+	// reset timers
 	ShootWait.Stop();
 	ShootWait.Reset();
 	AutoDriveTimer.Stop();
@@ -92,7 +93,9 @@ void Robot::DisabledInit()
 	ExtraCockWait.Stop();
 	ExtraCockWait.Reset();
 	
-	// todo disable ALL toggles: add function to SimpleJoystick
+	// reset all button toggles
+	this->Joystick1->DisableToggleAll();
+	this->Joystick2->DisableToggleAll();
 	
 	return;
 }
@@ -208,12 +211,17 @@ void Robot::TeleopInit()
 	
 	this->MechanumDrive->Enable();
 	
+	// reset timers
 	ShootWait.Stop();
 	ShootWait.Reset();
 	AutoDriveTimer.Stop();
 	AutoDriveTimer.Reset();
 	ExtraCockWait.Stop();
 	ExtraCockWait.Reset();
+	
+	// reset button toggles
+	this->Joystick1->DisableToggleAll();
+	this->Joystick2->DisableToggleAll();
 	
 	return;
 }
