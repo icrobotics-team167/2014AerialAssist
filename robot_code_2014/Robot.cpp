@@ -21,7 +21,8 @@ Robot::Robot() :
 	ExtraCockWait(),
 	ShootWait(),
 	
-	AutoDriveTimer()
+	AutoDriveTimer(),
+	AutoArmDownTimer()
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -90,6 +91,8 @@ void Robot::DisabledInit()
 	ShootWait.Reset();
 	AutoDriveTimer.Stop();
 	AutoDriveTimer.Reset();
+	AutoArmDownTimer.Stop();
+	AutoArmDownTimer.Reset();
 	ExtraCockWait.Stop();
 	ExtraCockWait.Reset();
 	
@@ -168,9 +171,20 @@ void Robot::AutonomousInit()
 	AutoDriveTimer.Stop();
 	
 	// put the arm down
-	JagRollerArm.Set(-0.5);
-	Wait(0.5);
+	bool arm_down = !ArmDownSwitch.Get();
+	
+	while (AutoArmDownTimer.Get() < 500 && !arm_down)
+	{
+		if (AutoArmDownTimer.Get() == 0)
+			AutoArmDownTimer.Start();
+		
+		arm_down = !ArmDownSwitch.Get();
+		
+		JagRollerArm.Set(-0.5);
+	}
+	
 	JagRollerArm.Set(0);
+	AutoArmDownTimer.Stop();
 	
 	// if the target is NOT hot, wait until it is before shooting
 	if (!autoTarget.hot)
@@ -216,6 +230,8 @@ void Robot::TeleopInit()
 	ShootWait.Reset();
 	AutoDriveTimer.Stop();
 	AutoDriveTimer.Reset();
+	AutoArmDownTimer.Stop();
+	AutoArmDownTimer.Reset();
 	ExtraCockWait.Stop();
 	ExtraCockWait.Reset();
 	
@@ -535,10 +551,6 @@ void Robot::TeleopPeriodic()
 	
 	bool arm_up = !ArmUpSwitch.Get();
 	bool arm_down = !ArmDownSwitch.Get();
-	
-	// todo remove
-	SmartDashboard::PutBoolean("arm up", arm_up);
-	SmartDashboard::PutBoolean("arm down", arm_down);
 	
 	float armJoyY = -this->RealJoy2->GetAxis(Joystick::kYAxis);
 	

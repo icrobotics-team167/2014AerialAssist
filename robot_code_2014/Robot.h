@@ -112,6 +112,7 @@ protected:
 	Timer ShootWait;
 	
 	Timer AutoDriveTimer;
+	Timer AutoArmDownTimer;
 	
 	TargetReport autoTarget;
 	
