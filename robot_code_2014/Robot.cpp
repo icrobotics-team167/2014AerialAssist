@@ -34,9 +34,6 @@ Robot::Robot() :
 	MechanumDrive->StopJags();
 	MechanumDrive->Init(true);
 	
-	// initialize catapult_cocked boolean to state of catapult photo eye
-	photoeye_tripped = !CatapultPhotoEye.Get();
-	
 	state = Default;
 	
 	return;
@@ -426,7 +423,7 @@ void Robot::TeleopPeriodic()
 	// Note: catapult motor should be run backwards to cock the catapult (pull it back)
 	
 	// set cocked status of catapult based on current state of photo eye
-	photoeye_tripped = !CatapultPhotoEye.Get();
+	bool photoeye_tripped = !CatapultPhotoEye.Get();
 	
 	switch (state)
 	{

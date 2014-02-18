@@ -106,7 +106,6 @@ protected:
 	DigitalInput ArmUpSwitch;
 
 	DigitalInput CatapultPhotoEye;
-	bool photoeye_tripped;
 	
 	Timer ExtraCockWait;
 	Timer ShootWait;
