@@ -10,6 +10,7 @@ public:
 	void Update();
 	bool Pressed(UINT32 button);
 	bool Toggled(UINT32 button);
+	bool Released(UINT32 button);
 	
 	void EnableToggle(UINT32 button);
 	void DisableToggle(UINT32 button);

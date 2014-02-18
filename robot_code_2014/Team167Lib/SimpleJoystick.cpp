@@ -108,6 +108,18 @@ bool SimpleJoystick::Toggled(UINT32 button)
 	}
 }
 
+/*
+ * Released
+ * returns true if the button was just released
+ */
+
+bool SimpleJoystick::Released(UINT32 button)
+{
+	// first, ensure the button was previously pressed
+	// then, check that it is now released
+	return (_lastButtonState & button > 0) && (_lastButtonState ^ _currentButtonState == button);
+}
+
 // toggle a button
 void SimpleJoystick::EnableToggle(UINT32 button)
 {
