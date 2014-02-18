@@ -95,6 +95,7 @@ void Robot::DisabledInit()
 	WaitForHot.Reset();
 	
 	this->Joystick2->DisableToggle(BUTTON_4);
+	this->Joystick1->DisableToggle(BUTTON_1);
 	
 	return;
 }
@@ -258,6 +259,9 @@ void Robot::TeleopInit()
 	WaitForHot.Stop();
 	WaitForHot.Reset();
 	
+	Joystick2->DisableToggle(BUTTON_4);
+	Joystick2->DisableToggle(BUTTON_1);
+	
 	return;
 }
 
@@ -343,7 +347,7 @@ void Robot::TeleopPeriodic()
 	
 	if (abs_twist > 0.4)
 		// if the joystick is twisted, calculate final voltage with throttle * twist
-		outputVolts *= abs_twist;
+		outputVolts *= abs_twist * 0.8;
 	else if (!Joystick1->Pressed(BUTTON_3) && !Joystick1->Pressed(BUTTON_4))
 		// otherwise, if we are not turning get the larger of the x and y values of the joystick posistion,
 		// and multiply that by the throttle to get final voltage
@@ -359,7 +363,7 @@ void Robot::TeleopPeriodic()
 	if (outputVolts > 12.0)
 		outputVolts = 12.0;
 	
-	if (thumbStickX != 0 && thumbStickY != 0 && outputVolts < 8.0)
+	if (thumbStickX != 0 && thumbStickY != 0 && x == 0 && y == 0)
 		outputVolts = 8.0;
 
 	MechanumDrive->SetMaxVoltage(outputVolts);
@@ -455,8 +459,10 @@ void Robot::TeleopPeriodic()
 	// set cocked status of catapult based on current state of photo eye
 	catapult_cocked = !CatapultPhotoEye.Get();
 	
-	// todo remove
 	SmartDashboard::PutBoolean("catapult cocked", catapult_cocked);
+	
+	// todo remove
+	SmartDashboard::PutBoolean("button 1 toggled", Joystick2->Toggled(BUTTON_1));
 	
 	// todo just stop immediately after tripping the photo eye
 	if (Joystick2->Toggled(BUTTON_4) && !catapult_cocked)
@@ -491,19 +497,23 @@ void Robot::TeleopPeriodic()
 		}
 	}
 	else
+	{
 		VicCatapult.Set(0);
+		Joystick2->DisableToggle(BUTTON_4);
+		Joystick2->DisableToggle(BUTTON_1);
+	}
 
 	// --------------
 	// roller control
 	// --------------
-	if (Joystick2->Pressed(BUTTON_10))
+	if (Joystick2->Pressed(BUTTON_12))
 	{
-		// tell the Jaguar to turn forward to pull ball in at 50% voltage forwards
+		// tell the Jaguar to turn forward to pull ball in at 100% voltage forwards
 		JagRoller.Set(1.0);
 	}
-	else if (Joystick2->Pressed(BUTTON_9))
+	else if (Joystick2->Pressed(BUTTON_11))
 	{
-		// tell the Jaguar to turn backwards to push ball out at 50% voltage backwards
+		// tell the Jaguar to turn backwards to push ball out at 100% voltage backwards
 		JagRoller.Set(-1.0);
 	}
 	else
