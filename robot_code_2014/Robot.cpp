@@ -34,7 +34,7 @@ Robot::Robot() :
 	MechanumDrive->StopJags();
 	MechanumDrive->Init(true);
 	
-	state = Default;
+	catapult_state = Default;
 	
 	return;
 }
@@ -422,10 +422,10 @@ void Robot::TeleopPeriodic()
 	// CANNOT decock catapult
 	// Note: catapult motor should be run backwards to cock the catapult (pull it back)
 	
-	// set cocked status of catapult based on current state of photo eye
+	// set cocked status of catapult based on current catapult_state of photo eye
 	bool photoeye_tripped = !CatapultPhotoEye.Get();
 	
-	switch (state)
+	switch (catapult_state)
 	{
 	case Off_Not_Cocked:
 		VicCatapult.Set(0);
@@ -433,9 +433,9 @@ void Robot::TeleopPeriodic()
 		SmartDashboard::PutBoolean("catapult cocked", false);
 		
 		if (Joystick2->Released(BUTTON_7))
-			state = On_Not_Cocked_1;
+			catapult_state = On_Not_Cocked_1;
 		else if (Joystick2->Released(BUTTON_4))
-			state = On_Not_Cocked_2;
+			catapult_state = On_Not_Cocked_2;
 		
 		break;
 		
@@ -445,9 +445,9 @@ void Robot::TeleopPeriodic()
 		SmartDashboard::PutBoolean("catapult cocked", false);
 		
 		if (Joystick2->Released(BUTTON_7) && !photoeye_tripped)
-			state = Off_Not_Cocked;
+			catapult_state = Off_Not_Cocked;
 		else if (photoeye_tripped)
-			state = Off_Cocked;
+			catapult_state = Off_Cocked;
 		
 		break;
 		
@@ -457,9 +457,9 @@ void Robot::TeleopPeriodic()
 		SmartDashboard::PutBoolean("catapult cocked", false);
 		
 		if (photoeye_tripped)
-			state = Extra_Cock_Time;
+			catapult_state = Extra_Cock_Time;
 		else if (Joystick2->Released(BUTTON_4) && !photoeye_tripped)
-			state = Off_Not_Cocked;
+			catapult_state = Off_Not_Cocked;
 		
 		break;
 		
@@ -474,7 +474,7 @@ void Robot::TeleopPeriodic()
 		{
 			ExtraCockWait.Stop();
 			ExtraCockWait.Reset();
-			state = Off_Cocked;
+			catapult_state = Off_Cocked;
 		}
 		
 		break;
@@ -485,7 +485,7 @@ void Robot::TeleopPeriodic()
 		SmartDashboard::PutBoolean("catapult cocked", true);
 		
 		if (Joystick2->Released(BUTTON_1))
-			state = Firing;
+			catapult_state = Firing;
 		
 		break;
 		
@@ -495,14 +495,14 @@ void Robot::TeleopPeriodic()
 		SmartDashboard::PutBoolean("catapult cocked", true);
 		
 		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 20)
-			state = Off_Cocked;
+			catapult_state = Off_Cocked;
 		else if (ShootWait.Get() == 0)
 			ShootWait.Start();
 		else if (ShootWait.Get() >= 20)
 		{
 			ShootWait.Stop();
 			ShootWait.Reset();
-			state = Off_Not_Cocked;
+			catapult_state = Off_Not_Cocked;
 		}
 		
 		break;
@@ -511,9 +511,9 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(0);
 		
 		if (photoeye_tripped)
-			state = Off_Cocked;
+			catapult_state = Off_Cocked;
 		else
-			state = Off_Not_Cocked;
+			catapult_state = Off_Not_Cocked;
 		
 		break;
 	}
