@@ -33,7 +33,7 @@ public:
 	
 	// states
 	typedef enum { Off_Not_Cocked = 0, On_Not_Cocked_1 = 1, On_Not_Cocked_2 = 2,
-					Extra_Cock_Time = 3, Off_Cocked = 4, Firing = 5, Default = 99 } CatapultState;
+					Extra_Cock_Time = 3, Off_Cocked = 4, Firing = 5, Start = 99 } CatapultState;
 	
 	Robot();
 	~Robot();

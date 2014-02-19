@@ -36,7 +36,7 @@ Robot::Robot() :
 	MechanumDrive->StopJags();
 	MechanumDrive->Init(true);
 	
-	catapult_state = Default;
+	catapult_state = Start;
 	
 	return;
 }
@@ -94,6 +94,8 @@ void Robot::DisabledInit()
 	
 	// turn off lights
 	CockedLights.Set(Relay::kOff);
+	
+	catapult_state = Start;
 	
 	return;
 }
@@ -191,8 +193,6 @@ void Robot::AutonomousInit()
 	if (!autoTarget.hot)
 		Wait(1.0);
 	
-	
-	
 	// shoot
 	VicCatapult.Set(-1);
 	Wait(0.01);
@@ -243,6 +243,8 @@ void Robot::TeleopInit()
 	
 	// turn off lights
 	CockedLights.Set(Relay::kOff);
+	
+	catapult_state = Start;
 	
 	return;
 }
@@ -440,6 +442,12 @@ void Robot::TeleopPeriodic()
 	
 	// set cocked status of catapult based on current catapult_state of photo eye
 	bool photoeye_tripped = !CatapultPhotoEye.Get();
+	
+	// todo remove
+	SmartDashboard::PutNumber("state", catapult_state);
+	SmartDashboard::PutNumber("LED relay", CockedLights.Get());
+	SmartDashboard::PutBoolean("button 4 released", Joystick2->Released(BUTTON_4));
+	SmartDashboard::PutBoolean("button 7 released", Joystick2->Released(BUTTON_7));
 	
 	switch (catapult_state)
 	{
