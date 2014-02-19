@@ -117,7 +117,7 @@ bool SimpleJoystick::Released(UINT32 button)
 {
 	// first, ensure the button was previously pressed
 	// then, check that it is now released
-	return (_lastButtonState & button > 0) && ((_lastButtonState ^ _currentButtonState) & button == 0);
+	return ((_lastButtonState & button) > 0) && ((_currentButtonState & button) == 0);
 }
 
 // toggle a button
