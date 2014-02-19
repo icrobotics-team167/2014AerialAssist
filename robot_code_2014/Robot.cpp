@@ -135,7 +135,7 @@ void Robot::AutonomousInit()
 	
 	// cock the catapult extra
 	VicCatapult.Set(-1);
-	Wait(0.01);
+	Wait(0.15);
 	VicCatapult.Set(0);
 	
 	// turn on the lights for extra awesome
@@ -144,10 +144,13 @@ void Robot::AutonomousInit()
 	// get the vision target (to check if it's hot)
 	autoTarget = getBestTarget(true, false);
 	
+	// todo remove
+	SmartDashboard::PutBoolean("target hot", autoTarget.hot);
+	
 	// drive for 2 seconds
 	Timer AutoDriveTimer;
 	
-	while (AutoDriveTimer.Get() < 2000)
+	while (AutoDriveTimer.Get() < 1)
 	{
 		if (AutoDriveTimer.Get() == 0)
 			AutoDriveTimer.Start();
@@ -157,10 +160,10 @@ void Robot::AutonomousInit()
 		MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
 		
 		if (task == MechanumWheels::ManualDrive ||
-			task == MechanumWheels::TaskFinished || 
+			task == MechanumWheels::TaskFinished ||
 			task == MechanumWheels::Stop)
 		{
-			MechanumDrive->Update(MechanumWheels::Forward);
+			MechanumDrive->Update(MechanumWheels::Reverse);
 		}
 		else
 		{
@@ -170,13 +173,32 @@ void Robot::AutonomousInit()
 	}
 	
 	MechanumDrive->Update(MechanumWheels::Stop);
+	MechanumDrive->Disable();
 	AutoDriveTimer.Stop();
+	
+	Timer AutoArmUpTimer;
+	bool arm_up = !ArmUpSwitch.Get();
+	
+	while (AutoArmUpTimer.Get() < 0.3 && !arm_up)
+	{
+		if (AutoArmUpTimer.Get() == 0)
+			AutoArmUpTimer.Start();
+		
+		arm_up = !ArmUpSwitch.Get();
+		
+		JagRollerArm.Set(0.3);
+	}
+	
+	JagRollerArm.Set(0);
+	AutoArmUpTimer.Stop();
+	
+	Wait(1);
 	
 	// put the arm down
 	Timer AutoArmDownTimer;
 	bool arm_down = !ArmDownSwitch.Get();
 	
-	while (AutoArmDownTimer.Get() < 500 && !arm_down)
+	while (AutoArmDownTimer.Get() < 0.5 && !arm_down)
 	{
 		if (AutoArmDownTimer.Get() == 0)
 			AutoArmDownTimer.Start();
@@ -191,11 +213,11 @@ void Robot::AutonomousInit()
 	
 	// if the target is NOT hot, wait until it is before shooting
 	if (!autoTarget.hot)
-		Wait(1.0);
+		Wait(3.0);
 	
 	// shoot
 	VicCatapult.Set(-1);
-	Wait(0.01);
+	Wait(0.3);
 	VicCatapult.Set(0);
 	
 	// turn off the lights
@@ -347,7 +369,7 @@ void Robot::TeleopPeriodic()
 	if (outputVolts > 12.0)
 		outputVolts = 12.0;
 	
-	if (thumbStickX != 0 && thumbStickY != 0 && x == 0 && y == 0)
+	if (thumbStickX != 0 && thumbStickY != 0 && abs_x < 0.2 && abs_y < 0.2)
 		outputVolts = 8.0;
 
 	MechanumDrive->SetMaxVoltage(outputVolts);
@@ -498,7 +520,7 @@ void Robot::TeleopPeriodic()
 		
 		if (ExtraCockWait.Get() == 0)
 			ExtraCockWait.Start();
-		else if (ExtraCockWait.Get() >= 10)
+		else if (ExtraCockWait.Get() >= 0.03)
 		{
 			ExtraCockWait.Stop();
 			ExtraCockWait.Reset();
@@ -524,11 +546,11 @@ void Robot::TeleopPeriodic()
 		CockedLights.Set(Relay::kOn);
 		SmartDashboard::PutBoolean("catapult cocked", true);
 		
-		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 20)
+		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 0.2)
 			catapult_state = Off_Cocked;
 		else if (ShootWait.Get() == 0)
 			ShootWait.Start();
-		else if (ShootWait.Get() >= 20)
+		else if (ShootWait.Get() >= 0.2)
 		{
 			ShootWait.Stop();
 			ShootWait.Reset();
