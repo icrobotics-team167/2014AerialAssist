@@ -21,7 +21,7 @@ Robot::Robot() :
 	ExtraCockWait(),
 	ShootWait(),
 	
-	CockedLights(4)
+	CockedLights(1, Relay::kForwardOnly)
 {
 	// set up joysticks
 	RealJoy1 = new Joystick(1);
@@ -93,7 +93,7 @@ void Robot::DisabledInit()
 	this->Joystick2->DisableToggleAll();
 	
 	// turn off lights
-	CockedLights.Set(0);
+	CockedLights.Set(Relay::kOff);
 	
 	return;
 }
@@ -137,7 +137,7 @@ void Robot::AutonomousInit()
 	VicCatapult.Set(0);
 	
 	// turn on the lights for extra awesome
-	CockedLights.Set(1);
+	CockedLights.Set(Relay::kOn);
 	
 	// get the vision target (to check if it's hot)
 	autoTarget = getBestTarget(true, false);
@@ -199,7 +199,7 @@ void Robot::AutonomousInit()
 	VicCatapult.Set(0);
 	
 	// turn off the lights
-	CockedLights.Set(0);
+	CockedLights.Set(Relay::kOff);
 
 	return;
 }
@@ -242,7 +242,7 @@ void Robot::TeleopInit()
 	this->Joystick2->DisableToggleAll();
 	
 	// turn off lights
-	CockedLights.Set(0);
+	CockedLights.Set(Relay::kOff);
 	
 	return;
 }
@@ -446,7 +446,7 @@ void Robot::TeleopPeriodic()
 	case Off_Not_Cocked:
 		VicCatapult.Set(0);
 		
-		CockedLights.Set(0);
+		CockedLights.Set(Relay::kOff);
 		SmartDashboard::PutBoolean("catapult cocked", false);
 		
 		if (Joystick2->Released(BUTTON_7))
@@ -459,7 +459,7 @@ void Robot::TeleopPeriodic()
 	case On_Not_Cocked_1:
 		VicCatapult.Set(-1);
 		
-		CockedLights.Set(0);
+		CockedLights.Set(Relay::kOff);
 		SmartDashboard::PutBoolean("catapult cocked", false);
 		
 		if (Joystick2->Released(BUTTON_7) && !photoeye_tripped)
@@ -472,7 +472,7 @@ void Robot::TeleopPeriodic()
 	case On_Not_Cocked_2:
 		VicCatapult.Set(-1);
 		
-		CockedLights.Set(0);
+		CockedLights.Set(Relay::kOff);
 		SmartDashboard::PutBoolean("catapult cocked", false);
 		
 		if (photoeye_tripped)
@@ -485,7 +485,7 @@ void Robot::TeleopPeriodic()
 	case Extra_Cock_Time:
 		VicCatapult.Set(-1);
 		
-		CockedLights.Set(0);
+		CockedLights.Set(Relay::kOff);
 		SmartDashboard::PutBoolean("catapult cocked", false);
 		
 		if (ExtraCockWait.Get() == 0)
@@ -502,7 +502,7 @@ void Robot::TeleopPeriodic()
 	case Off_Cocked:
 		VicCatapult.Set(0);
 		
-		CockedLights.Set(1);
+		CockedLights.Set(Relay::kOn);
 		SmartDashboard::PutBoolean("catapult cocked", true);
 		
 		if (Joystick2->Released(BUTTON_1))
@@ -513,7 +513,7 @@ void Robot::TeleopPeriodic()
 	case Firing:
 		VicCatapult.Set(-1);
 		
-		CockedLights.Set(1);
+		CockedLights.Set(Relay::kOn);
 		SmartDashboard::PutBoolean("catapult cocked", true);
 		
 		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 20)
@@ -532,7 +532,7 @@ void Robot::TeleopPeriodic()
 	default:
 		VicCatapult.Set(0);
 		
-		CockedLights.Set(0);
+		CockedLights.Set(Relay::kOff);
 		
 		if (photoeye_tripped)
 			catapult_state = Off_Cocked;

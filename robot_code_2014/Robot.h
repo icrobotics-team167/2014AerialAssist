@@ -113,7 +113,7 @@ protected:
 	TargetReport autoTarget;
 	
 	CatapultState catapult_state;
-	DigitalOutput CockedLights;
+	Relay CockedLights;
 };
 
 #endif
