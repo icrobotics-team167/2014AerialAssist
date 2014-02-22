@@ -1,5 +1,24 @@
 #include "_Robot.h"	
 
+//Camera constants used for distance calculation
+#define Y_IMAGE_RES 240		// Y Image resolution in pixels, should be 120, 240 or 480
+#define VIEW_ANGLE 50.144	// Axis M1013
+
+//Score limits used for target identification
+#define RECTANGULARITY_LIMIT 40
+#define ASPECT_RATIO_LIMIT 55
+
+//Score limits used for hot target determination
+#define TAPE_WIDTH_LIMIT 50
+#define VERTICAL_SCORE_LIMIT 50
+#define LR_SCORE_LIMIT 50
+
+//Minimum area of particles to be considered
+#define AREA_MINIMUM 150
+
+//Maximum number of particles to process
+#define MAX_PARTICLES 8
+
 /**
  * Computes the estimated distance to a target using the height of the particle in the image. For more information and graphics
  * showing the math behind this approach see the Vision Processing section of the ScreenStepsLive documentation.
