@@ -230,13 +230,13 @@ Robot::TargetReport Robot::getBestTarget(bool setHot, bool setDistance)
 					target.verticalScore = verticalScore;
 				}
 			}
-			
-			// determine if target is hot
-			if (setHot)
-				target.hot = hotOrNot(target);
-			else
-				target.hot = false;
 		}
+		
+		// determine if target is hot
+		if (setHot)
+			target.hot = hotOrNot(target);
+		else
+			target.hot = false;
 		
 		// calculate distance to target
 		if (setDistance && verticalTargetCount > 0)
