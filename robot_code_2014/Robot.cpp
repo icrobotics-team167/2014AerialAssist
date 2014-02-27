@@ -135,7 +135,7 @@ void Robot::AutonomousInit()
 	
 	// cock the catapult extra
 	VicCatapult.Set(-1);
-	Wait(0.15);
+	Wait(0.3);
 	VicCatapult.Set(0);
 	
 	// turn on the lights for extra awesome
@@ -217,7 +217,7 @@ void Robot::AutonomousInit()
 	
 	// shoot
 	VicCatapult.Set(-1);
-	Wait(0.3);
+	Wait(0.6);
 	VicCatapult.Set(0);
 	
 	// turn off the lights
@@ -465,12 +465,6 @@ void Robot::TeleopPeriodic()
 	// set cocked status of catapult based on current catapult_state of photo eye
 	bool photoeye_tripped = !CatapultPhotoEye.Get();
 	
-	// todo remove
-	SmartDashboard::PutNumber("state", catapult_state);
-	SmartDashboard::PutNumber("LED relay", CockedLights.Get());
-	SmartDashboard::PutBoolean("button 4 released", Joystick2->Released(BUTTON_4));
-	SmartDashboard::PutBoolean("button 7 released", Joystick2->Released(BUTTON_7));
-	
 	switch (catapult_state)
 	{
 	case Off_Not_Cocked:
@@ -520,7 +514,7 @@ void Robot::TeleopPeriodic()
 		
 		if (ExtraCockWait.Get() == 0)
 			ExtraCockWait.Start();
-		else if (ExtraCockWait.Get() >= 0.03)
+		else if (ExtraCockWait.Get() >= 0.06)
 		{
 			ExtraCockWait.Stop();
 			ExtraCockWait.Reset();
@@ -546,11 +540,11 @@ void Robot::TeleopPeriodic()
 		CockedLights.Set(Relay::kOn);
 		SmartDashboard::PutBoolean("catapult cocked", true);
 		
-		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 0.2)
+		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 0.4)
 			catapult_state = Off_Cocked;
 		else if (ShootWait.Get() == 0)
 			ShootWait.Start();
-		else if (ShootWait.Get() >= 0.2)
+		else if (ShootWait.Get() >= 0.4)
 		{
 			ShootWait.Stop();
 			ShootWait.Reset();
