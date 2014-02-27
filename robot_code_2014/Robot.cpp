@@ -131,23 +131,23 @@ void Robot::AutonomousInit()
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
 	
-	this->MechanumDrive->SetMaxVoltage(7.0);
+	this->MechanumDrive->SetMaxVoltage(9.0);
 	
 	// cock the catapult extra
 	VicCatapult.Set(-1);
-	Wait(0.3);
+	Wait(0.55);
 	VicCatapult.Set(0);
 	
 	// turn on the lights for extra awesome
 	CockedLights.Set(Relay::kOn);
-	
+
 	// get the vision target (to check if it's hot)
-	autoTarget = getBestTarget(true, false);
+	//autoTarget = getBestTarget(true, false);
 	
 	// todo remove
-	SmartDashboard::PutBoolean("target hot", autoTarget.hot);
-	
-	// drive for 2 seconds
+	//SmartDashboard::PutBoolean("target hot", autoTarget.hot);
+
+	// drive for 1 second
 	Timer AutoDriveTimer;
 	
 	while (AutoDriveTimer.Get() < 1)
@@ -212,12 +212,14 @@ void Robot::AutonomousInit()
 	AutoArmDownTimer.Stop();
 	
 	// if the target is NOT hot, wait until it is before shooting
+	/*
 	if (!autoTarget.hot)
 		Wait(3.0);
+	*/
 	
 	// shoot
 	VicCatapult.Set(-1);
-	Wait(0.6);
+	Wait(1.0);
 	VicCatapult.Set(0);
 	
 	// turn off the lights
@@ -514,7 +516,7 @@ void Robot::TeleopPeriodic()
 		
 		if (ExtraCockWait.Get() == 0)
 			ExtraCockWait.Start();
-		else if (ExtraCockWait.Get() >= 0.06)
+		else if (ExtraCockWait.Get() >= 0.55)
 		{
 			ExtraCockWait.Stop();
 			ExtraCockWait.Reset();
@@ -540,11 +542,11 @@ void Robot::TeleopPeriodic()
 		CockedLights.Set(Relay::kOn);
 		SmartDashboard::PutBoolean("catapult cocked", true);
 		
-		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 0.4)
+		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 1.0)
 			catapult_state = Off_Cocked;
 		else if (ShootWait.Get() == 0)
 			ShootWait.Start();
-		else if (ShootWait.Get() >= 0.4)
+		else if (ShootWait.Get() >= 1.0)
 		{
 			ShootWait.Stop();
 			ShootWait.Reset();
