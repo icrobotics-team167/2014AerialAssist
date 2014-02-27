@@ -168,11 +168,8 @@ Robot::TargetReport Robot::getBestTarget(bool setHot, bool setDistance)
 	vector<ParticleAnalysisReport> *reports = filteredImage->GetOrderedParticleAnalysisReports();  //get a particle analysis report for each particle
 
 	verticalTargetCount = horizontalTargetCount = 0;
+	
 	//Iterate through each particle, scoring it and determining whether it is a target or not
-	
-	// todo remove
-	SmartDashboard::PutNumber("reports->size", (double) reports->size());
-	
 	if(reports->size() > 0)
 	{
 		scores = new Scores[reports->size()];
