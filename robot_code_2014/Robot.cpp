@@ -332,11 +332,11 @@ void Robot::TeleopPeriodic()
 	
 	// raw axis 3 is the twist axis on the Logitech Extreme 3D Pro joystick
 	// we use the raw axis because the default mappings are incorrect
-	float twist = this->RealJoy1->GetRawAxis(3);
+	//float twist = this->RealJoy1->GetRawAxis(3);
 	
-	float thumbStickX = this->RealJoy1->GetRawAxis(5);
+	//float thumbStickX = this->RealJoy1->GetRawAxis(5);
 	// note: -1 if pushed forward, 1 if pulled back
-	float thumbStickY = this->RealJoy1->GetRawAxis(6);
+	//float thumbStickY = this->RealJoy1->GetRawAxis(6);
 	
 	// Set the throttle
 	bool turbo = Joystick1->Toggled(BUTTON_8);
@@ -349,17 +349,13 @@ void Robot::TeleopPeriodic()
 	 * we then add 6.0 to get final voltage values from 0.0 (off) at minus position to 12.0 (full throttle) at the plus position
 	 */
 	double throttle_mag = this->RealJoy1->GetRawAxis(4) * -6.0 + 6.0;
-	SmartDashboard::PutNumber("throttle", throttle_mag);
 
-	float abs_x = abs(x), abs_y = abs(y), abs_twist = abs(twist);
+	float abs_x = abs(x), abs_y = abs(y);
 	
 	double outputVolts = throttle_mag;
 	
-	if (abs_twist > 0.4)
-		// if the joystick is twisted, calculate final voltage with throttle * twist
-		outputVolts *= abs_twist * 0.8;
-	else if (!Joystick1->Pressed(BUTTON_3) && !Joystick1->Pressed(BUTTON_4))
-		// otherwise, if we are not turning get the larger of the x and y values of the joystick posistion,
+	if (!Joystick1->Pressed(BUTTON_5) && !Joystick1->Pressed(BUTTON_6))
+		// if we are not turning get the larger of the x and y values of the joystick posistion,
 		// and multiply that by the throttle to get final voltage
 		outputVolts *= max(abs_x, abs_y);
 	// note: if we are turning, the rate of turning depends only on the throttle setting
@@ -373,41 +369,27 @@ void Robot::TeleopPeriodic()
 	if (outputVolts > 12.0)
 		outputVolts = 12.0;
 	
+	/*
 	if (thumbStickX != 0 && thumbStickY != 0 && abs_x < 0.2 && abs_y < 0.2)
 		outputVolts = 8.0;
+	*/
 
 	MechanumDrive->SetMaxVoltage(outputVolts);
 	
 	// determine direction
 	MechanumWheels::DriveDir dir = MechanumWheels::Stop;
 
-	if (abs_twist > 0.4)
-	{
-		if (twist > 0)
-		{
-			// rotate right
-			dir = MechanumWheels::RotateLeft;
-			if (outputVolts < 2.0)
-				outputVolts = 2.0;
-		}
-		else
-		{
-			// rotate left
-			dir = MechanumWheels::RotateRight;
-			if (outputVolts < 2.0)
-				outputVolts = 2.0;
-		}
-	}
-	else if (Joystick1->Pressed(BUTTON_4))
+	if (Joystick1->Pressed(BUTTON_5))
 	{
 			// rotate right
 			dir = MechanumWheels::RotateLeft;
 	}
-	else if (Joystick1->Pressed(BUTTON_3))
+	else if (Joystick1->Pressed(BUTTON_6))
 	{
 		// rotate left
 		dir = MechanumWheels::RotateRight;
 	}
+	/*
 	else if (thumbStickX == 1 && thumbStickY == -1)
 	{
 		// forward right diagonal
@@ -428,6 +410,7 @@ void Robot::TeleopPeriodic()
 		// forward right diagonal
 		dir = MechanumWheels::BackLeft;
 	}
+	*/
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
 	{
 		// stop
