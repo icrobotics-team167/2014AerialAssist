@@ -309,6 +309,7 @@ void Robot::TeleopPeriodic()
 	// -------------------------------------------------
 	
 	// only spend time doing distance calculation if the driver wants it
+	/*
 	if (Joystick1->Pressed(BUTTON_11))
 	{
 		TargetReport target = getBestTarget(false, true);
@@ -318,6 +319,7 @@ void Robot::TeleopPeriodic()
 	}
 	else
 		SmartDashboard::PutNumber("distance", -1.0);
+	*/
 
 	//-------------------------
 	// drive logic (input side)
@@ -473,7 +475,7 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(0);
 		
 		CockedLights.Set(Relay::kOff);
-		SmartDashboard::PutBoolean("catapult cocked", false);
+		SmartDashboard::PutBoolean("catapult status", false);
 		
 		if (Joystick2->Released(BUTTON_7))
 			catapult_state = On_Not_Cocked_1;
@@ -486,7 +488,7 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(-1);
 		
 		CockedLights.Set(Relay::kOff);
-		SmartDashboard::PutBoolean("catapult cocked", false);
+		SmartDashboard::PutBoolean("catapult status", false);
 		
 		if (Joystick2->Released(BUTTON_7) && !photoeye_tripped)
 			catapult_state = Off_Not_Cocked;
@@ -499,7 +501,7 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(-1);
 		
 		CockedLights.Set(Relay::kOff);
-		SmartDashboard::PutBoolean("catapult cocked", false);
+		SmartDashboard::PutBoolean("catapult status", false);
 		
 		if (photoeye_tripped)
 			catapult_state = Extra_Cock_Time;
@@ -512,7 +514,7 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(-1);
 		
 		CockedLights.Set(Relay::kOff);
-		SmartDashboard::PutBoolean("catapult cocked", false);
+		SmartDashboard::PutBoolean("catapult status", false);
 		
 		if (ExtraCockWait.Get() == 0)
 			ExtraCockWait.Start();
@@ -529,7 +531,7 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(0);
 		
 		CockedLights.Set(Relay::kOn);
-		SmartDashboard::PutBoolean("catapult cocked", true);
+		SmartDashboard::PutBoolean("catapult status", true);
 		
 		if (Joystick2->Released(BUTTON_1))
 			catapult_state = Firing;
@@ -540,7 +542,7 @@ void Robot::TeleopPeriodic()
 		VicCatapult.Set(-1);
 		
 		CockedLights.Set(Relay::kOn);
-		SmartDashboard::PutBoolean("catapult cocked", true);
+		SmartDashboard::PutBoolean("catapult status", true);
 		
 		if (Joystick2->Released(BUTTON_1) && ShootWait.Get() < 1.0)
 			catapult_state = Off_Cocked;
