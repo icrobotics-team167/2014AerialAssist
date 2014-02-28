@@ -381,13 +381,13 @@ void Robot::TeleopPeriodic()
 
 	if (Joystick1->Pressed(BUTTON_5))
 	{
-			// rotate right
-			dir = MechanumWheels::RotateLeft;
+			// rotate left
+			dir = MechanumWheels::RotateRight;
 	}
 	else if (Joystick1->Pressed(BUTTON_6))
 	{
-		// rotate left
-		dir = MechanumWheels::RotateRight;
+		// rotate right
+		dir = MechanumWheels::RotateLeft;
 	}
 	/*
 	else if (thumbStickX == 1 && thumbStickY == -1)
@@ -462,7 +462,7 @@ void Robot::TeleopPeriodic()
 		
 		if (Joystick2->Released(BUTTON_7))
 			catapult_state = On_Not_Cocked_1;
-		else if (Joystick2->Released(BUTTON_4))
+		else if (Joystick2->Released(BUTTON_1))
 			catapult_state = On_Not_Cocked_2;
 		
 		break;
@@ -488,7 +488,7 @@ void Robot::TeleopPeriodic()
 		
 		if (photoeye_tripped)
 			catapult_state = Extra_Cock_Time;
-		else if (Joystick2->Released(BUTTON_4) && !photoeye_tripped)
+		else if (Joystick2->Released(BUTTON_1) && !photoeye_tripped)
 			catapult_state = Off_Not_Cocked;
 		
 		break;
