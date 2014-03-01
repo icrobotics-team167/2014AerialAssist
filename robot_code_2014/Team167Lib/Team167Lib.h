@@ -6,6 +6,7 @@
 #include "SimpleJoystick.h"
 #include "Team167CanJaguar.h"
 #include "MechanumWheels.h"
+#include "VictorDrive.h"
 #include "KinectJoy.h"
 
 
