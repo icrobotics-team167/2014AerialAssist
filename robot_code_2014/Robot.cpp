@@ -5,10 +5,10 @@ START_ROBOT_CLASS(Robot);
 
 // Robot class constructor
 Robot::Robot() :
-	JagFL(21, CANJaguar::kPosition),
-	JagFR(22, CANJaguar::kPosition),
-	JagBL(23, CANJaguar::kPosition),
-	JagBR(24, CANJaguar::kPosition),
+	VicFL(2),
+	VicFR(3),
+	VicBL(4),
+	VicBR(5),
 	VicCatapult(1),
 	JagRoller(25, CANJaguar::kPercentVbus),
 	JagRollerArm(26, CANJaguar::kPercentVbus),
@@ -29,12 +29,8 @@ Robot::Robot() :
 	Joystick1 = new SimpleJoystick(RealJoy1);
 	Joystick2 = new SimpleJoystick(RealJoy2);
 	
-	// set up drive class
-	UINT16 encoder_lines = 250;
-	MechanumDrive = new MechanumWheels(&JagFL, &JagFR, &JagBL, &JagBR, encoder_lines);
-	MechanumDrive->SetMaxVoltage(10.0);
-	MechanumDrive->StopJags();
-	MechanumDrive->Init(true);
+	// intialize drive class
+	VictorWheels = new VictorDrive(&VicFL, &VicFR, &VicBL, &VicBR);
 	
 	catapult_state = Start;
 	
@@ -48,7 +44,7 @@ Robot::~Robot()
 	delete Joystick2;
 	delete RealJoy1;
 	delete RealJoy2;
-	delete MechanumDrive;
+	delete VictorWheels;
 	
 	return;
 }
@@ -79,15 +75,7 @@ void Robot::DisabledInit()
 	this->GetWatchdog().Feed();
 	this->GetWatchdog().SetExpiration(500);
 	
-	JagFL.ChangeControlMode(CANJaguar::kPosition);
-	JagFR.ChangeControlMode(CANJaguar::kPosition);
-	JagBL.ChangeControlMode(CANJaguar::kPosition);
-	JagBR.ChangeControlMode(CANJaguar::kPosition);
-	
-	JagFR.DisableControl();
-	JagFL.DisableControl();
-	JagBR.DisableControl();
-	JagBL.DisableControl();
+	VictorWheels->Disable();
 	
 	// reset timers
 	ShootWait.Stop();
@@ -135,11 +123,6 @@ void Robot::AutonomousInit()
 	this->GetWatchdog().SetEnabled(true);
 	this->GetWatchdog().Feed();
 	
-	if (MechanumDrive)
-		this->MechanumDrive->Enable();
-	
-	this->MechanumDrive->SetMaxVoltage(9.0);
-	
 	// cock the catapult extra
 	VicCatapult.Set(-1);
 	Wait(0.55);
@@ -156,6 +139,7 @@ void Robot::AutonomousInit()
 
 	// drive for 1 second
 	Timer AutoDriveTimer;
+	VictorWheels->SetVoltagePercent(0.8);
 	
 	while (AutoDriveTimer.Get() < 1)
 	{
@@ -163,24 +147,11 @@ void Robot::AutonomousInit()
 			AutoDriveTimer.Start();
 		
 		// drive forward
-		MechanumDrive->CheckComplete();
-		MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
-		
-		if (task == MechanumWheels::ManualDrive ||
-			task == MechanumWheels::TaskFinished ||
-			task == MechanumWheels::Stop)
-		{
-			MechanumDrive->Update(MechanumWheels::Reverse);
-		}
-		else
-		{
-			// currently in a task
-			MechanumDrive->FeedJags();
-		}
+		VictorWheels->Forward();
 	}
 	
-	MechanumDrive->StopJags();
-	MechanumDrive->Disable();
+	VictorWheels->Stop();
+	VictorWheels->Disable();
 	AutoDriveTimer.Stop();
 	
 	Timer AutoArmUpTimer;
@@ -260,16 +231,6 @@ void Robot::TeleopInit()
 	this->GetWatchdog().SetEnabled(true);
 	this->GetWatchdog().Feed();
 	
-	JagFL.ChangeControlMode(CANJaguar::kVoltage);
-	JagFR.ChangeControlMode(CANJaguar::kVoltage);
-	JagBL.ChangeControlMode(CANJaguar::kVoltage);
-	JagBR.ChangeControlMode(CANJaguar::kVoltage);
-	
-	JagFL.EnableControl(0.0f);
-	JagFR.EnableControl(0.0f);
-	JagBL.EnableControl(0.0f);
-	JagBR.EnableControl(0.0f);
-	
 	// reset timers
 	ShootWait.Stop();
 	ShootWait.Reset();
@@ -332,10 +293,6 @@ void Robot::TeleopPeriodic()
 	// we use the raw axis because the default mappings are incorrect
 	//float twist = this->RealJoy1->GetRawAxis(3);
 	
-	//float thumbStickX = this->RealJoy1->GetRawAxis(5);
-	// note: -1 if pushed forward, 1 if pulled back
-	//float thumbStickY = this->RealJoy1->GetRawAxis(6);
-	
 	// Set the throttle
 	bool turbo = Joystick1->Toggled(BUTTON_8);
 	
@@ -343,127 +300,73 @@ void Robot::TeleopPeriodic()
 	 * raw axis 4 is the throttle axis on the Logitech Extreme 3D Pro joystick
 	 * we use the raw axis because the default mappings are incorrect
 	 * the throttle, by default, returns values from -1.0 at the plus position to 1.0 at the minus position
-	 * we first multiply by -6.0 to get values from -6.0 at the minus position to 6.0 at the plus position
-	 * we then add 6.0 to get final voltage values from 0.0 (off) at minus position to 12.0 (full throttle) at the plus position
+	 * we first multiply by -1.0 to get values from -1.0 at the minus position to 1.0 at the plus position
+	 * we then add 1.0 and divide by 2 to get final voltage percentages from 0.0 (off) at minus position
+	 * to 1.0 (full throttle) at the plus position
 	 */
-	double throttle_mag = this->RealJoy1->GetRawAxis(4) * -6.0 + 6.0;
+	double throttle_mag = (this->RealJoy1->GetRawAxis(4) * -1.0 + 1.0) / 2.0;
 	SmartDashboard::PutNumber("throttle", throttle_mag);
 
 	float abs_x = abs(x), abs_y = abs(y);
 	
-	double outputVolts = throttle_mag;
+	double voltagePercent = throttle_mag;
 	
 	if (!Joystick1->Pressed(BUTTON_5) && !Joystick1->Pressed(BUTTON_6))
 		// if we are not turning get the larger of the x and y values of the joystick posistion,
 		// and multiply that by the throttle to get final voltage
-		outputVolts *= max(abs_x, abs_y);
+		voltagePercent *= max(abs_x, abs_y);
 	// note: if we are turning, the rate of turning depends only on the throttle setting
 	
-	if (outputVolts < 1)
-		outputVolts = 1.0;
+	if (voltagePercent < 1)
+		voltagePercent = 0.1;
 	
 	if (turbo)
-		outputVolts *= 1.5;
+		voltagePercent *= 1.5;
 	
-	if (outputVolts > 12.0)
-		outputVolts = 12.0;
+	if (voltagePercent > 1.0)
+		voltagePercent = 1.0;
 	
-	/*
-	if (thumbStickX != 0 && thumbStickY != 0 && abs_x < 0.2 && abs_y < 0.2)
-		outputVolts = 8.0;
-	*/
-
-	// feed the jaguars
-	JagFL.Feed();
-	JagFR.Feed();
-	JagBL.Feed();
-	JagBR.Feed();
+	VictorWheels->SetVoltagePercent(voltagePercent);
 
 	if (Joystick1->Pressed(BUTTON_5))
 	{
 		// rotate left
-		JagFL.Set(outputVolts);
-		JagBL.Set(outputVolts);
-		JagFR.Set(-outputVolts);
-		JagBR.Set(-outputVolts);
+		VictorWheels->RotateLeft();
 	}
 	else if (Joystick1->Pressed(BUTTON_6))
 	{
 		// rotate right
-		JagFL.Set(-outputVolts);
-		JagBL.Set(-outputVolts);
-		JagFR.Set(outputVolts);
-		JagBR.Set(outputVolts);
+		VictorWheels->RotateRight();
 	}
-	/*
-	else if (thumbStickX == 1 && thumbStickY == -1)
-	{
-		// forward right diagonal
-		dir = MechanumWheels::FwdRight;
-	}
-	else if (thumbStickX == -1 && thumbStickY == -1)
-	{
-		// forward right diagonal
-		dir = MechanumWheels::FwdLeft;
-	}
-	else if (thumbStickX == 1 && thumbStickY == 1)
-	{
-		// forward right diagonal
-		dir = MechanumWheels::BackRight;
-	}
-	else if (thumbStickX == -1 && thumbStickY == 1)
-	{
-		// forward right diagonal
-		dir = MechanumWheels::BackLeft;
-	}
-	*/
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
 	{
 		// stop
-		JagFL.Set(0);
-		JagFR.Set(0);
-		JagBL.Set(0);
-		JagBR.Set(0);
+		VictorWheels->Stop();
 	}
 	else if (z >= 225 && z < 315)
 	{
 		// forward
-		JagFL.Set(outputVolts);
-		JagBL.Set(outputVolts);
-		JagFR.Set(outputVolts);
-		JagBR.Set(outputVolts);
+		VictorWheels->Forward();
 	}
 	else if ((z >= 315 && z <= 360) || (z >= 0 && z < 45))
 	{
 		// right
-		JagFR.Set(outputVolts);
-		JagBR.Set(-outputVolts);
-		JagFL.Set(-outputVolts);
-		JagBL.Set(outputVolts);
+		VictorWheels->Right();
 	}
 	else if(z >= 45 && z < 135)
 	{
-		// backward
-		JagFL.Set(-outputVolts);
-		JagBL.Set(-outputVolts);
-		JagFR.Set(-outputVolts);
-		JagBR.Set(-outputVolts);
+		// backwards
+		VictorWheels->Reverse();
 	}
 	else if (z >= 135 && z < 225)
 	{
 		// left
-		JagFR.Set(-outputVolts);
-		JagBR.Set(outputVolts);
-		JagFL.Set(outputVolts);
-		JagBL.Set(-outputVolts);
+		VictorWheels->Left();
 	}
 	else
 	{
 		// stop
-		JagFL.Set(0);
-		JagFR.Set(0);
-		JagBL.Set(0);
-		JagBR.Set(0);
+		VictorWheels->Stop();
 	}
 	
 	// ----------------

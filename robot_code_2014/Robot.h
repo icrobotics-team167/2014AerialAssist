@@ -64,11 +64,11 @@ public:
 	TargetReport getBestTarget(bool setHot = false, bool setDistance = false);
 	
 protected:
-	// driving jaguars
-	Team167CanJaguar JagFL;
-	Team167CanJaguar JagFR;
-	Team167CanJaguar JagBL;
-	Team167CanJaguar JagBR;
+	// driving Victors
+	Victor VicFL;
+	Victor VicFR;
+	Victor VicBL;
+	Victor VicBR;
 	
 	// motor controllers for other components
 	Victor VicCatapult;
@@ -80,7 +80,7 @@ protected:
 	SimpleJoystick *Joystick1;
 	SimpleJoystick *Joystick2;
 	
-	MechanumWheels *MechanumDrive;
+	VictorDrive *VictorWheels;
 	
 	DigitalInput ArmDownSwitch;
 	DigitalInput ArmUpSwitch;
