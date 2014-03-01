@@ -79,8 +79,15 @@ void Robot::DisabledInit()
 	this->GetWatchdog().Feed();
 	this->GetWatchdog().SetExpiration(500);
 	
-	if (MechanumDrive)
-		this->MechanumDrive->Disable();
+	JagFL.ChangeControlMode(CANJaguar::kPosition);
+	JagFR.ChangeControlMode(CANJaguar::kPosition);
+	JagBL.ChangeControlMode(CANJaguar::kPosition);
+	JagBR.ChangeControlMode(CANJaguar::kPosition);
+	
+	JagFR.DisableControl();
+	JagFL.DisableControl();
+	JagBR.DisableControl();
+	JagBL.DisableControl();
 	
 	// reset timers
 	ShootWait.Stop();
@@ -127,7 +134,7 @@ void Robot::AutonomousInit()
 	this->GetWatchdog().SetExpiration(1000.0);
 	this->GetWatchdog().SetEnabled(true);
 	this->GetWatchdog().Feed();
-
+	
 	if (MechanumDrive)
 		this->MechanumDrive->Enable();
 	
@@ -172,7 +179,7 @@ void Robot::AutonomousInit()
 		}
 	}
 	
-	MechanumDrive->Update(MechanumWheels::Stop);
+	MechanumDrive->StopJags();
 	MechanumDrive->Disable();
 	AutoDriveTimer.Stop();
 	
@@ -219,7 +226,7 @@ void Robot::AutonomousInit()
 	
 	// shoot
 	VicCatapult.Set(-1);
-	Wait(1.0);
+	Wait(1.5);
 	VicCatapult.Set(0);
 	
 	// turn off the lights
@@ -253,7 +260,15 @@ void Robot::TeleopInit()
 	this->GetWatchdog().SetEnabled(true);
 	this->GetWatchdog().Feed();
 	
-	this->MechanumDrive->Enable();
+	JagFL.ChangeControlMode(CANJaguar::kVoltage);
+	JagFR.ChangeControlMode(CANJaguar::kVoltage);
+	JagBL.ChangeControlMode(CANJaguar::kVoltage);
+	JagBR.ChangeControlMode(CANJaguar::kVoltage);
+	
+	JagFL.EnableControl(0.0f);
+	JagFR.EnableControl(0.0f);
+	JagBL.EnableControl(0.0f);
+	JagBR.EnableControl(0.0f);
 	
 	// reset timers
 	ShootWait.Stop();
@@ -271,23 +286,6 @@ void Robot::TeleopInit()
 	catapult_state = Start;
 	
 	return;
-}
-
-void Robot::SetPIDs()
-{
-	DriverStation * ds = DriverStation::GetInstance();
-	
-	float P = ds->GetAnalogIn(1);
- 	float I = ds->GetAnalogIn(2);
-	float D = ds->GetAnalogIn(3);
- 	
- 	for (int wheel = 0; wheel < 4; wheel++)
- 	{
- 		if (ds->GetDigitalIn(wheel + 1))
- 			MechanumDrive->SetPID(wheel, P, I, D);
- 	}
- 	
- 	return;
 }
 
 /**
@@ -349,6 +347,7 @@ void Robot::TeleopPeriodic()
 	 * we then add 6.0 to get final voltage values from 0.0 (off) at minus position to 12.0 (full throttle) at the plus position
 	 */
 	double throttle_mag = this->RealJoy1->GetRawAxis(4) * -6.0 + 6.0;
+	SmartDashboard::PutNumber("throttle", throttle_mag);
 
 	float abs_x = abs(x), abs_y = abs(y);
 	
@@ -374,20 +373,27 @@ void Robot::TeleopPeriodic()
 		outputVolts = 8.0;
 	*/
 
-	MechanumDrive->SetMaxVoltage(outputVolts);
-	
-	// determine direction
-	MechanumWheels::DriveDir dir = MechanumWheels::Stop;
+	// feed the jaguars
+	JagFL.Feed();
+	JagFR.Feed();
+	JagBL.Feed();
+	JagBR.Feed();
 
 	if (Joystick1->Pressed(BUTTON_5))
 	{
-			// rotate left
-			dir = MechanumWheels::RotateRight;
+		// rotate left
+		JagFL.Set(outputVolts);
+		JagBL.Set(outputVolts);
+		JagFR.Set(-outputVolts);
+		JagBR.Set(-outputVolts);
 	}
 	else if (Joystick1->Pressed(BUTTON_6))
 	{
 		// rotate right
-		dir = MechanumWheels::RotateLeft;
+		JagFL.Set(-outputVolts);
+		JagBL.Set(-outputVolts);
+		JagFR.Set(outputVolts);
+		JagBR.Set(outputVolts);
 	}
 	/*
 	else if (thumbStickX == 1 && thumbStickY == -1)
@@ -414,32 +420,50 @@ void Robot::TeleopPeriodic()
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
 	{
 		// stop
-		dir = MechanumWheels::Stop;
+		JagFL.Set(0);
+		JagFR.Set(0);
+		JagBL.Set(0);
+		JagBR.Set(0);
 	}
 	else if (z >= 225 && z < 315)
 	{
 		// forward
-		dir = MechanumWheels::Forward;
+		JagFL.Set(outputVolts);
+		JagBL.Set(outputVolts);
+		JagFR.Set(outputVolts);
+		JagBR.Set(outputVolts);
 	}
 	else if ((z >= 315 && z <= 360) || (z >= 0 && z < 45))
 	{
 		// right
-		dir = MechanumWheels::Left;
+		JagFR.Set(outputVolts);
+		JagBR.Set(-outputVolts);
+		JagFL.Set(-outputVolts);
+		JagBL.Set(outputVolts);
 	}
 	else if(z >= 45 && z < 135)
 	{
 		// backward
-		dir = MechanumWheels::Reverse;
+		JagFL.Set(-outputVolts);
+		JagBL.Set(-outputVolts);
+		JagFR.Set(-outputVolts);
+		JagBR.Set(-outputVolts);
 	}
 	else if (z >= 135 && z < 225)
 	{
 		// left
-		dir = MechanumWheels::Right;
+		JagFR.Set(-outputVolts);
+		JagBR.Set(outputVolts);
+		JagFL.Set(outputVolts);
+		JagBL.Set(-outputVolts);
 	}
 	else
 	{
 		// stop
-		dir = MechanumWheels::Stop;
+		JagFL.Set(0);
+		JagFR.Set(0);
+		JagBL.Set(0);
+		JagBR.Set(0);
 	}
 	
 	// ----------------
@@ -590,22 +614,6 @@ void Robot::TeleopPeriodic()
 	}
 	else
 		JagRollerArm.Set(0);
-	
-	// drive
-	MechanumDrive->CheckComplete();
-	MechanumWheels::DriveDir task = MechanumDrive->CurrentTask;
-	
-	if (task == MechanumWheels::ManualDrive ||
-		task == MechanumWheels::TaskFinished || 
-		task == MechanumWheels::Stop)
-	{
-		MechanumDrive->Update(dir);
-	}
-	else
-	{
-		// currently in a task
-		MechanumDrive->FeedJags();
-	}
 
 	return;
 }
