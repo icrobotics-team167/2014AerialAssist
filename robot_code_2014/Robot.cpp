@@ -5,10 +5,11 @@ START_ROBOT_CLASS(Robot);
 
 // Robot class constructor
 Robot::Robot() :
-	VicFL(2),
-	VicFR(3),
-	VicBL(4),
-	VicBR(5),
+	VicFL(4),
+	VicFR(2),
+	VicBL(5),
+	VicBR(3),
+	
 	VicCatapult(1),
 	JagRoller(25, CANJaguar::kPercentVbus),
 	JagRollerArm(26, CANJaguar::kPercentVbus),
