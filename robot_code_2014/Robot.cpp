@@ -338,12 +338,12 @@ void Robot::TeleopPeriodic()
 
 	if (Joystick1->Pressed(BUTTON_6))
 	{
-		// rotate left
+		// rotate right
 		VictorWheels->RotateLeft();
 	}
 	else if (Joystick1->Pressed(BUTTON_5))
 	{
-		// rotate right
+		// rotate left
 		VictorWheels->RotateRight();
 	}
 	else if (Vector3::GetMagnitude(x, y) < 0.25)
