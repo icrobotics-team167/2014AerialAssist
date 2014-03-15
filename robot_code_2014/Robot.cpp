@@ -313,12 +313,19 @@ void Robot::TeleopPeriodic()
 	double voltagePercent = throttle_mag;
 	
 	if (!Joystick1->Pressed(BUTTON_5) && !Joystick1->Pressed(BUTTON_6))
+	{
 		// if we are not turning get the larger of the x and y values of the joystick posistion,
 		// and multiply that by the throttle to get final voltage
 		voltagePercent *= max(abs_x, abs_y);
-	// note: if we are turning, the rate of turning depends only on the throttle setting
+	}
+	else
+	{
+		// if we are turning, the rate of turning depends only on the throttle setting,
+		// and the rate of turning is limited to 80% voltage maximum
+		voltagePercent *= 0.8;
+	}
 	
-	if (voltagePercent < 1)
+	if (voltagePercent < 0.1)
 		voltagePercent = 0.1;
 	
 	if (turbo)
@@ -329,12 +336,12 @@ void Robot::TeleopPeriodic()
 	
 	VictorWheels->SetVoltagePercent(voltagePercent);
 
-	if (Joystick1->Pressed(BUTTON_5))
+	if (Joystick1->Pressed(BUTTON_6))
 	{
 		// rotate left
 		VictorWheels->RotateLeft();
 	}
-	else if (Joystick1->Pressed(BUTTON_6))
+	else if (Joystick1->Pressed(BUTTON_5))
 	{
 		// rotate right
 		VictorWheels->RotateRight();
@@ -347,22 +354,22 @@ void Robot::TeleopPeriodic()
 	else if (z >= 225 && z < 315)
 	{
 		// forward
-		VictorWheels->Forward();
+		VictorWheels->Reverse();
 	}
 	else if ((z >= 315 && z <= 360) || (z >= 0 && z < 45))
 	{
 		// right
-		VictorWheels->Right();
+		VictorWheels->Left();
 	}
 	else if(z >= 45 && z < 135)
 	{
 		// backwards
-		VictorWheels->Reverse();
+		VictorWheels->Forward();
 	}
 	else if (z >= 135 && z < 225)
 	{
 		// left
-		VictorWheels->Left();
+		VictorWheels->Right();
 	}
 	else
 	{
